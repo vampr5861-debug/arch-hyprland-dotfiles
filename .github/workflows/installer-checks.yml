@@ -21,7 +21,7 @@ jobs:
       - name: Check installer shell syntax
         run: bash -n install.sh
 
-      - name: Validate component paths, UI theme and wallpaper catalog
+      - name: Validate components and wallpaper catalog
         run: python3 tools/momo_installer.py --check
 
       - name: Run standard-library unit tests

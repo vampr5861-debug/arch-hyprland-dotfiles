@@ -71,16 +71,17 @@ cd arch-hyprland-dotfiles
 
 ### Optional interactive installer
 
-MOMO includes a terminal installer using the official Arch `dialog` package. It lets you choose individual desktop components and **skip, download all, or select specific wallpapers** from a link-only Wallhaven catalog. It moves existing selected configurations into a private backup before replacement; it does not install software packages or restart your desktop.
+MOMO includes a dark, keyboard-driven installer powered by the official Arch [`gum`](https://github.com/charmbracelet/gum) package. Choose a **Minimal**, **Complete**, or **Custom** profile, review exact file changes, and optionally download all or individual wallpapers from a checksum-verified Wallhaven catalog. Identical configurations are skipped; changed originals go into private backups and can be restored from the menu. It does not install packages or restart your desktop.
 
 ```bash
-sudo pacman -S --needed dialog
+sudo pacman -S --needed gum
 bash install.sh --check
+bash install.sh --doctor
 bash install.sh --dry-run
 bash install.sh
 ```
 
-Read the [installer guide](docs/INSTALLER.md) **before applying** anything. Run it as a regular user, not with `sudo`. The downloadable artwork is **not hosted in this repository** and may have disappeared or changed; original file checksums are verified before installation.
+To restore a previous installation, run `bash install.sh --restore`. Read the [installer guide](docs/INSTALLER.md) **before applying** anything. Run it as a regular user, not with `sudo`. The downloadable artwork is **not hosted in this repository** and may have disappeared or changed; original file checksums are verified before installation.
 
 ### Manual installation
 
