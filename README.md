@@ -1,103 +1,93 @@
-<div align="center">
+# MOMO
 
-# MOMO · Hyprland Dotfiles
-
-**A minimal, dark Arch Linux desktop built around Hyprland.**
-
-A personal setup focused on a clean layout, compact tools, subtle animations and keyboard-driven workflows.
+**Hyprland dotfiles for Arch Linux.** A personal Wayland desktop with a dark palette, compact tools and keyboard-driven window management.
 
 ![Arch Linux](https://img.shields.io/badge/Arch%20Linux-1793D1?style=flat-square&logo=archlinux&logoColor=white)
-![Hyprland](https://img.shields.io/badge/Hyprland-Lua%20config-58E1FF?style=flat-square)
-![Waybar](https://img.shields.io/badge/Waybar-Custom-222222?style=flat-square)
 ![Config checks](https://github.com/vampr5861-debug/arch-hyprland-dotfiles/actions/workflows/validate.yml/badge.svg)
 
-[Preview](#preview) · [Components](#components) · [Installation](docs/INSTALLATION.md) · [Keybindings](docs/KEYBINDINGS.md) · [Troubleshooting](docs/TROUBLESHOOTING.md)
+[Desktop](#desktop) · [Features](#features) · [Installation](#installation) · [Keybindings](docs/KEYBINDINGS.md) · [Documentation](#documentation)
 
-</div>
+## Desktop
 
----
+[<img src="screenshots/desktop-fastfetch.png" alt="Hyprland desktop with Kitty and Fastfetch" width="100%">](screenshots/desktop-fastfetch.png)
 
-## Preview
+<sub>Hyprland · Waybar · Kitty · Fastfetch</sub>
 
-### Desktop · Fastfetch
-
-[<img src="screenshots/desktop-fastfetch.png" alt="Hyprland desktop with Kitty and Fastfetch" width="900">](screenshots/desktop-fastfetch.png)
-
-<sub>Arch Linux · Hyprland · Waybar · Kitty · Fastfetch</sub>
-
-### Waypaper · Wallpaper gallery
-
-[<img src="screenshots/waypaper-overview.png" alt="Waypaper wallpaper gallery" width="900">](screenshots/waypaper-overview.png)
-
-### Rofi · Application launcher
-
-[<img src="screenshots/rofi-launcher.png" alt="Rofi application launcher" width="900">](screenshots/rofi-launcher.png)
+<table>
+  <tr>
+    <td width="50%" align="center" valign="top">
+      <a href="screenshots/waypaper-overview.png"><img src="screenshots/waypaper-overview.png" alt="Waypaper wallpaper gallery" width="100%"></a><br>
+      <sub>Waypaper · Wallpapers</sub>
+    </td>
+    <td width="50%" align="center" valign="top">
+      <a href="screenshots/rofi-launcher.png"><img src="screenshots/rofi-launcher.png" alt="Rofi application launcher" width="100%"></a><br>
+      <sub>Rofi · App launcher</sub>
+    </td>
+  </tr>
+</table>
 
 > Screenshots show the supplied desktop, including local network information. Third-party wallpapers visible in them are not included in this repository.
 
+## Features
+
+- **Keyboard-oriented workspace.** Six persistent workspaces, a scratchpad, and shortcuts for window focus, movement, resizing, swapping and grouping.
+- **Compact desktop controls.** Waybar status modules, a three-column Rofi launcher and Waypaper with the Hyprpaper backend.
+- **Dark, consistent appearance.** Dark GTK settings, Papirus icons, the Notwaita-Black cursor and subtle window / workspace animations.
+- **Everyday shortcuts.** Hyprlock screen locking, Wlogout session controls, screenshots, PipeWire audio controls, media keys and US / Russian layout switching with `Alt + Shift`.
+
 ## Components
 
-| Component | Setup |
+| Component | Stack |
 | :--- | :--- |
-| **Window manager** | Hyprland, Lua configuration, Dwindle layout |
-| **Status bar** | Waybar with workspaces, system stats, network, audio, Bluetooth and clock |
-| **Launcher** | Rofi with a custom three-column theme |
-| **Wallpapers** | Waypaper + Hyprpaper |
-| **Lock screen** | Hyprlock with a blurred screenshot background |
-| **Session menu** | Wlogout with compact text buttons and keyboard navigation |
-| **Login manager** | SDDM with the `where_is_my_sddm_theme` theme |
-| **Terminal** | Kitty · Fish · Starship |
-| **Desktop tools** | Thunar · nwg-look · SwayNC (default configuration) · Cliphist · Cava · Btop |
-| **Appearance** | Dark GTK settings · Papirus icons · Notwaita-Black cursor |
+| Window manager | Hyprland · Lua configuration · Dwindle |
+| Panel & launcher | Waybar · Rofi |
+| Wallpapers | Waypaper · Hyprpaper |
+| Terminal | Kitty · Fish · Starship |
+| Lock & session | Hyprlock (screenshot blur) · Wlogout (text buttons & hotkeys) |
+| Login (optional) | SDDM · `where_is_my_sddm_theme` |
+| Desktop tools | Thunar · nwg-look · SwayNC · Cliphist · Cava · Btop |
+| Appearance | Materia-dark GTK · Papirus icons · Notwaita-Black cursor |
 
-### Workflow highlights
-
-- Six persistent workspaces and a special scratchpad workspace.
-- Window focus, movement, resizing, swapping and grouping from the keyboard.
-- Subtle window and workspace animations.
-- US / Russian keyboard layout switching with `Alt + Shift`.
-- Screenshot shortcuts and PipeWire media / volume controls.
-- A compact, dark interface with a consistent visual style.
+Waybar shows workspaces, system stats, network, audio, Bluetooth and the clock. SwayNC uses its default configuration; no custom notification theme is bundled.
 
 ## Installation
 
-This repository is a **personal configuration snapshot**, not a universal Arch installer. It has no one-click installation script. Use an existing Arch Linux installation with a working Wayland session and graphics drivers.
+This is a **manually installed personal configuration snapshot**. Start with an existing Arch Linux installation, working graphics drivers and a usable Wayland session. There is no automatic installer.
 
-1. Read the [installation guide](docs/INSTALLATION.md).
-2. Check the [hardware-specific settings](docs/INSTALLATION.md#before-copying).
-3. Back up your existing configuration.
-4. Copy only the components you want and adjust them for your system.
+1. Read the [installation guide](docs/INSTALLATION.md) for dependencies and optional components.
+2. Review [compatibility and hardware assumptions](#before-you-copy), then back up the destinations you will change.
+3. Copy only the components you want and adapt them to your system. Keep the guide's rollback steps available.
 
 ~~~bash
 git clone https://github.com/vampr5861-debug/arch-hyprland-dotfiles.git
 cd arch-hyprland-dotfiles
 ~~~
 
-The [installation guide](docs/INSTALLATION.md) separates desktop dependencies, fonts and optional components, and includes backup and rollback steps. The [package lists](packages/) are informational snapshots with unrelated applications; do not install them wholesale.
+The [package inventories](packages/README.md) are informational snapshots with unrelated applications, **not dependency lists**. Do not install them wholesale.
 
-## Before copying
+## Before you copy
 
-Some settings are specific to the original computer:
+> **Compatibility:** no known-good Hyprland or Waybar version is recorded in this snapshot. Confirm support for the Lua `hl.*` API, Waybar's `ext/workspaces` module and the included `hyprctl dispatch` expressions against the documentation for your installed releases. Lua syntax checks do not establish compatibility.
 
-| Setting | Current assumption | What to check |
-| :--- | :--- | :--- |
-| Monitor | `DP-1` | Update persistent workspace rules for your output |
-| Display | 2560 × 1440 | Wlogout placement was tuned for this resolution |
-| GPU | NVIDIA | Waybar's GPU temperature module calls `nvidia-smi` |
-| CPU sensor | `coretemp` | Change the Waybar sensor on non-Intel systems |
-| Fonts | JetBrainsMono Nerd Font, Iosevka Nerd Font, Adwaita Sans | Install the expected families; missing fonts change spacing and glyphs |
-| Wallpaper | `~/Pictures/wallhaven-n6y9zl.jpg` | Supply your own image; it is not included |
+The original machine's settings need a review before copying:
 
-### Compatibility and session behavior
+| Check | Snapshot assumption |
+| :--- | :--- |
+| Monitor | Persistent workspace rules target `DP-1`; use your output name. |
+| Display | Wlogout placement is tuned for 2560 × 1440. |
+| GPU | Waybar calls NVIDIA's `nvidia-smi`; adapt the module for other GPUs. |
+| CPU sensor | Waybar uses Intel's `coretemp`; select your CPU's sensor. |
+| Fonts | JetBrainsMono Nerd Font, Iosevka Nerd Font and Adwaita Sans; missing families change spacing and glyphs. |
+| Wallpaper | `~/Pictures/wallhaven-n6y9zl.jpg` is not included; supply your own image. |
 
-The Hyprland configuration uses Lua and the `hl.*` API. **No known-good Hyprland or Waybar version is recorded in this snapshot.** Confirm support for that API, Waybar's `ext/workspaces` module and the included `hyprctl dispatch` expressions against the documentation for your installed releases before copying. Lua syntax checks do not establish that compatibility.
+### Session behavior
 
-Cliphist records copied text and images during the session; the autostart clears its history at each Hyprland start. No clipboard-history picker shortcut is configured. Kitty uses the account's login shell; copying the Fish configuration does not select Fish automatically.
+- **Clipboard:** Cliphist records copied text and images during the session and clears its history at each Hyprland start. No history-picker shortcut is configured.
+- **Shell:** Kitty uses the account's login shell. Copying the Fish configuration does not select Fish automatically.
 
 See the [keybinding reference](docs/KEYBINDINGS.md) for the complete shortcuts, including the scratchpad, window groups and media controls. Hardware compatibility, SDDM rendering and the appearance on other displays remain unverified.
 
-
-## Automated checks
+### Validation
 
 GitHub Actions runs lightweight static checks on pushes and pull requests:
 
@@ -140,12 +130,4 @@ Third-party license texts and notices are retained in [LICENSES/](LICENSES/) and
 
 The [audit](AUDIT.md#repository-review--november-5-2026) records unresolved Cava shader provenance, artwork permissions and the optional Dracula theme's missing resources. Preserved notices do not establish complete redistribution compliance.
 
----
-
-<div align="center">
-
-**Made for Arch Linux · Hyprland · a calmer desktop**
-
-[Back to top](#momo--hyprland-dotfiles)
-
-</div>
+[Back to top](#momo)
