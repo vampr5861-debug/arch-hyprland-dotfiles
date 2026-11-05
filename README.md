@@ -20,32 +20,25 @@
 
 ## Preview
 
-### Desktop · Fastfetch
+### Desktop & Fastfetch
 
-<div align="center">
-  <a href="screenshots/desktop-fastfetch.png">
-    <img src="screenshots/desktop-fastfetch.png" alt="Arch Linux Hyprland desktop with Waybar, Kitty and Fastfetch" width="950">
-  </a>
-  <p><sub>Arch Linux · Hyprland · Waybar · Kitty · Fastfetch</sub></p>
-</div>
+[![Hyprland desktop with Kitty and Fastfetch](screenshots/desktop-fastfetch.png)](screenshots/desktop-fastfetch.png)
 
-### Wallpaper gallery · Waypaper
+<sub>Arch Linux · Hyprland · Waybar · Kitty · Fastfetch</sub>
 
-<div align="center">
-  <a href="screenshots/waypaper-overview.png">
-    <img src="screenshots/waypaper-overview.png" alt="Waypaper wallpaper selector on the Hyprland desktop" width="950">
-  </a>
-  <p><sub>Waypaper using the Hyprpaper backend · wallpaper selector</sub></p>
-</div>
+### Waypaper
 
-<details>
-<summary>Earlier Waypaper gallery screenshot</summary>
+[![Waypaper wallpaper gallery](screenshots/waypaper-overview.png)](screenshots/waypaper-overview.png)
 
-![Previous gallery screenshot](screenshots/waypaper-gallery.png)
+<sub>Waypaper with Hyprpaper backend</sub>
 
-</details>
+### Rofi
 
-> Screenshots from the real setup. Wallpapers shown in the previews are not distributed with this repository.
+[![Rofi application launcher](screenshots/rofi-launcher.png)](screenshots/rofi-launcher.png)
+
+<sub>Minimal three-column Rofi application launcher</sub>
+
+> Эти изображения показывают настоящий рабочий стол. Сами обои, изображённые на скриншотах, не включены в репозиторий.
 
 ## Components
 
@@ -238,7 +231,7 @@ arch-hyprland-dotfiles/
 
 - В репозитории **нет автоматического установочного скрипта**. Все настройки копируются выборочно и вручную.
 - Это копия конфигов на дату **5 ноября 2026 года**. Новые изменения живой системы не попадают сюда сами собой.
-- Снимок Waypaper показывает сторонние обои, но файлы этих обоев не распространяются.
+- На скриншотах показаны сторонние обои, но сами файлы этих обоев не распространяются.
 - Системные и пользовательские пути, шрифты и драйверы могут потребовать настройки.
 - `extras/unreferenced-scripts/` сохранены для истории; они **не входят в активную конфигурацию**.
 - Перед публикацией собственных изменений не добавляйте секреты, токены, приватные ключи и данные приложений.
