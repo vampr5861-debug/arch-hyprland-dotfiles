@@ -1,41 +1,48 @@
-# Публикация в подготовленный GitHub-репозиторий
+# Maintaining and Publishing Updates
 
-Публичный пустой репозиторий создан: 
-https://github.com/vampr5861-debug/arch-hyprland-dotfiles
+The project is already publicly available:
 
-## Что уже сделано
+**https://github.com/vampr5861-debug/arch-hyprland-dotfiles**
 
-- Исключены 4 PNG-иконки Wlogout с неподтверждённым происхождением.
-- Оставлены настройки кнопок Wlogout и заменены значки на текстовые подписи.
-- Вложены `Dracula-pink-accent` с GPL-3.0, `Notwaita-Black` с уведомлением о
-  лицензии и ссылки на авторов. Лицензии сторонних файлов не заменяют друг друга.
-- Скриншот содержит локальный IP-адрес; при желании замените изображение.
-- Сами обои с Wallhaven не включены, их авторские права не подтверждены.
+## Update the local clone
 
-## Внимание
+From the original machine, the working clone is located at:
 
-Это статическая сборка — запуск на другом ПК не проверен. Перед публикацией
-просмотрите `README.md`, `AUDIT.md`, `home/` и `system/`, проверьте на персональные
-данные и секреты. Не публикуйте и не копируйте её в собственный `~/.config/`
-без предварительной проверки. На оригинальном Arch ничего не менялось.
+~~~bash
+cd ~/Downloads/dotfiles-final/arch-hyprland-dotfiles
+git pull --ff-only
+~~~
 
-## Публикация через Git в Kitty (на исходном Arch)
+Changes to files in your live `~/.config/` directory **do not automatically update this clone**. Review any changed configuration and copy only the intended, non-sensitive files into the matching paths under `home/.config/`.
 
-1. Распакуйте ZIP в отдельную папку через Thunar (например `~/Downloads/`).
-2. Перейдите в распакованный каталог `arch-hyprland-dotfiles`.
-3. После личной проверки файлов используйте команды в каталоге копии:
+## Review changes before pushing
 
-```sh
-git init -b main
-git add -A
+~~~bash
+git status --short
+git diff
 git diff --cached --check
-git diff --cached --stat
-git diff --cached
-git commit -m "Initial Hyprland dotfiles"
-git remote add origin https://github.com/vampr5861-debug/arch-hyprland-dotfiles.git
-git push -u origin main
-```
+~~~
 
-Для `git push` необходима аутентификация GitHub. Никогда не публикуйте пароль,
-токен или SSH-ключи в исходниках. `git add -A` относится **только к проверенной
-распакованной копии**; его нельзя выполнять из домашнего каталога.
+Check for secrets, private paths, personal data, binaries with uncertain licenses and unintentional backup files. Also verify that third-party licenses and attributions are preserved. Do not commit whole application profiles, session data, tokens or SSH keys.
+
+## Commit and push
+
+~~~bash
+git add README.md
+git commit -m "Update documentation"
+git push
+~~~
+
+The example stages **README.md only**. To publish other files, specify their paths explicitly rather than using `git add -A` without review.
+
+If Git reports an unknown author identity, configure the repository-local author name and a GitHub-verified email address or the correct GitHub `noreply` address. If GitHub requires authentication, use GitHub CLI (`gh auth login` and `gh auth setup-git`) rather than your account password.
+
+## Repository-specific notes
+
+- Wlogout's unverified PNG icons were excluded and replaced with text labels.
+- Dracula GTK and Notwaita cursor files retain upstream licensing and attribution notices.
+- Wallpapers from Wallhaven are not shipped because redistribution permissions have not been verified.
+- Some provided screenshots show a local LAN address. Review screenshots before publication.
+- The published configuration has not been tested on every system; avoid promising universal one-command installation.
+
+The repository is a **manual, reproducible reference**, not a turnkey installer.
