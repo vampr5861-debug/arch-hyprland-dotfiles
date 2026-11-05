@@ -9,10 +9,9 @@ A personal setup focused on a clean layout, compact tools, subtle animations and
 ![Arch Linux](https://img.shields.io/badge/Arch%20Linux-1793D1?style=flat-square&logo=archlinux&logoColor=white)
 ![Hyprland](https://img.shields.io/badge/Hyprland-Lua%20config-58E1FF?style=flat-square)
 ![Waybar](https://img.shields.io/badge/Waybar-Custom-222222?style=flat-square)
-![Setup](https://img.shields.io/badge/Setup-Manual-555555?style=flat-square)
 ![Config checks](https://github.com/vampr5861-debug/arch-hyprland-dotfiles/actions/workflows/validate.yml/badge.svg)
 
-[Preview](#preview) · [Features](#features) · [Installation](docs/INSTALLATION.md) · [Keybindings](docs/KEYBINDINGS.md) · [Troubleshooting](docs/TROUBLESHOOTING.md)
+[Preview](#preview) · [Components](#components) · [Installation](docs/INSTALLATION.md) · [Keybindings](docs/KEYBINDINGS.md) · [Troubleshooting](docs/TROUBLESHOOTING.md)
 
 </div>
 
@@ -22,21 +21,21 @@ A personal setup focused on a clean layout, compact tools, subtle animations and
 
 ### Desktop · Fastfetch
 
-[![Hyprland desktop with Kitty and Fastfetch](screenshots/desktop-fastfetch.png)](screenshots/desktop-fastfetch.png)
+[<img src="screenshots/desktop-fastfetch.png" alt="Hyprland desktop with Kitty and Fastfetch" width="900">](screenshots/desktop-fastfetch.png)
 
 <sub>Arch Linux · Hyprland · Waybar · Kitty · Fastfetch</sub>
 
 ### Waypaper · Wallpaper gallery
 
-[![Waypaper wallpaper gallery](screenshots/waypaper-overview.png)](screenshots/waypaper-overview.png)
+[<img src="screenshots/waypaper-overview.png" alt="Waypaper wallpaper gallery" width="900">](screenshots/waypaper-overview.png)
 
 ### Rofi · Application launcher
 
-[![Rofi application launcher](screenshots/rofi-launcher.png)](screenshots/rofi-launcher.png)
+[<img src="screenshots/rofi-launcher.png" alt="Rofi application launcher" width="900">](screenshots/rofi-launcher.png)
 
-> Screenshots show the actual desktop. Third-party wallpapers visible in them are not included in this repository.
+> Screenshots show the supplied desktop, including local network information. Third-party wallpapers visible in them are not included in this repository.
 
-## Features
+## Components
 
 | Component | Setup |
 | :--- | :--- |
@@ -48,7 +47,7 @@ A personal setup focused on a clean layout, compact tools, subtle animations and
 | **Session menu** | Wlogout with compact text buttons and keyboard navigation |
 | **Login manager** | SDDM with the `where_is_my_sddm_theme` theme |
 | **Terminal** | Kitty · Fish · Starship |
-| **Desktop tools** | Thunar · nwg-look · SwayNC · Cliphist · Cava · Btop |
+| **Desktop tools** | Thunar · nwg-look · SwayNC (default configuration) · Cliphist · Cava · Btop |
 | **Appearance** | Dark GTK settings · Papirus icons · Notwaita-Black cursor |
 
 ### Workflow highlights
@@ -62,7 +61,7 @@ A personal setup focused on a clean layout, compact tools, subtle animations and
 
 ## Installation
 
-This repository is a **personal configuration snapshot**, not a universal Arch installer. It has no one-click installation script.
+This repository is a **personal configuration snapshot**, not a universal Arch installer. It has no one-click installation script. Use an existing Arch Linux installation with a working Wayland session and graphics drivers.
 
 1. Read the [installation guide](docs/INSTALLATION.md).
 2. Check the [hardware-specific settings](docs/INSTALLATION.md#before-copying).
@@ -74,7 +73,7 @@ git clone https://github.com/vampr5861-debug/arch-hyprland-dotfiles.git
 cd arch-hyprland-dotfiles
 ~~~
 
-The [package lists](packages/) are snapshots of explicitly installed packages from the original machine. They include unrelated applications and are **not** a dependency list—do not install them blindly.
+The [installation guide](docs/INSTALLATION.md) separates desktop dependencies, fonts and optional components, and includes backup and rollback steps. The [package lists](packages/) are informational snapshots with unrelated applications; do not install them wholesale.
 
 ## Before copying
 
@@ -86,17 +85,23 @@ Some settings are specific to the original computer:
 | Display | 2560 × 1440 | Wlogout placement was tuned for this resolution |
 | GPU | NVIDIA | Waybar's GPU temperature module calls `nvidia-smi` |
 | CPU sensor | `coretemp` | Change the Waybar sensor on non-Intel systems |
-| Fonts | JetBrainsMono Nerd Font, Noto Sans | Install the fonts or change the font settings |
+| Fonts | JetBrainsMono Nerd Font, Iosevka Nerd Font, Adwaita Sans | Install the expected families; missing fonts change spacing and glyphs |
 | Wallpaper | `~/Pictures/wallhaven-n6y9zl.jpg` | Supply your own image; it is not included |
 
-The Hyprland configuration uses the Lua configuration format. Confirm that your installed Hyprland release supports it before copying the file.
+### Compatibility and session behavior
+
+The Hyprland configuration uses Lua and the `hl.*` API. **No known-good Hyprland or Waybar version is recorded in this snapshot.** Confirm support for that API, Waybar's `ext/workspaces` module and the included `hyprctl dispatch` expressions against the documentation for your installed releases before copying. Lua syntax checks do not establish that compatibility.
+
+Cliphist records copied text and images during the session; the autostart clears its history at each Hyprland start. No clipboard-history picker shortcut is configured. Kitty uses the account's login shell; copying the Fish configuration does not select Fish automatically.
+
+See the [keybinding reference](docs/KEYBINDINGS.md) for the complete shortcuts, including the scratchpad, window groups and media controls. Hardware compatibility, SDDM rendering and the appearance on other displays remain unverified.
 
 
 ## Automated checks
 
 GitHub Actions runs lightweight static checks on pushes and pull requests:
 
-- Waybar JSON, Starship TOML and selected INI files.
+- Waybar JSON, Wlogout layout, Starship TOML, selected INI and XML files.
 - Hyprland Lua syntax.
 - Shell syntax for the archived helper scripts.
 
@@ -132,6 +137,8 @@ A passing workflow catches syntax errors; it does **not** replace testing the co
 This setup uses and includes work from the wider open-source desktop ecosystem, including [Hyprland](https://hypr.land/), [Waybar](https://github.com/Alexays/Waybar), [Rofi](https://github.com/davatorium/rofi), [Dracula GTK](https://github.com/dracula/gtk), [Notwaita Cursor](https://github.com/ful1e5/notwaita-cursor) and [Where is my SDDM theme?](https://github.com/stepanzubkov/where-is-my-sddm-theme).
 
 Third-party license texts and notices are retained in [LICENSES/](LICENSES/) and alongside the relevant assets. **No project-wide license has been selected for the original dotfiles.** Public visibility does not automatically grant permission to redistribute or relicense the original configuration. Third-party components remain subject to their own licenses.
+
+The [audit](AUDIT.md#repository-review--november-5-2026) records unresolved Cava shader provenance, artwork permissions and the optional Dracula theme's missing resources. Preserved notices do not establish complete redistribution compliance.
 
 ---
 
