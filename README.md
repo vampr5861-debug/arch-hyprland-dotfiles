@@ -2,17 +2,17 @@
 
 # MOMO · Hyprland Dotfiles
 
-**Arch Linux / Hyprland · a personal dark desktop**
+**Arch Linux / Hyprland · a minimal dark desktop**
 
-Минималистичный сетап с Waybar, Rofi, Waypaper, Hyprlock и SDDM.  
-Чёткая типографика, аккуратные анимации, тёмные цвета и настройка без автоматических установщиков.
+A personal Arch Linux setup built around Hyprland, Waybar, Rofi, Waypaper, Hyprlock and SDDM.  
+Clean typography, subtle animations, a dark color palette and manual installation—no one-click scripts.
 
 ![Arch Linux](https://img.shields.io/badge/Arch%20Linux-1793D1?style=flat-square&logo=archlinux&logoColor=white)
 ![Hyprland](https://img.shields.io/badge/Hyprland-Lua%20config-58E1FF?style=flat-square)
 ![Waybar](https://img.shields.io/badge/Waybar-Custom-222222?style=flat-square)
-![Install](https://img.shields.io/badge/Install-Manual-555555?style=flat-square)
+![Installation](https://img.shields.io/badge/Installation-Manual-555555?style=flat-square)
 
-[Preview](#preview) · [Installation](#installation) · [Keybindings](#keybindings) · [Structure](#structure) · [Notes](#notes) · [Credits](#credits)
+[Preview](#preview) · [Components](#components) · [Installation](#installation) · [Keybindings](#keybindings) · [Structure](#structure) · [Notes](#notes) · [Credits](#credits)
 
 </div>
 
@@ -30,48 +30,48 @@
 
 [![Waypaper wallpaper gallery](screenshots/waypaper-overview.png)](screenshots/waypaper-overview.png)
 
-<sub>Waypaper with Hyprpaper backend</sub>
+<sub>Waypaper with the Hyprpaper backend</sub>
 
 ### Rofi
 
 [![Rofi application launcher](screenshots/rofi-launcher.png)](screenshots/rofi-launcher.png)
 
-<sub>Minimal three-column Rofi application launcher</sub>
+<sub>Minimal three-column application launcher</sub>
 
-> Эти изображения показывают настоящий рабочий стол. Сами обои, изображённые на скриншотах, не включены в репозиторий.
+> These are screenshots of the actual desktop. The third-party wallpapers visible in them are **not distributed** in this repository.
 
 ## Components
 
-| Компонент | Что используется |
+| Component | Configuration |
 | :--- | :--- |
-| **Window manager** | Hyprland, конфигурация на Lua, layout `dwindle` |
-| **Bar** | Waybar: рабочие столы, CPU/GPU, память, сеть, звук, Bluetooth и часы |
-| **Launcher** | Rofi — тема `type-4/style-8` |
-| **Wallpaper** | Waypaper + Hyprpaper |
-| **Lock screen** | Hyprlock — часы, дата, размытие фона |
-| **Power menu** | Wlogout — компактные текстовые кнопки |
-| **Login screen** | SDDM + `where_is_my_sddm_theme` |
-| **Terminal / shell** | Kitty + Fish + Starship |
-| **Files / GTK** | Thunar, GTK-темы, Papirus, курсор Notwaita-Black |
-| **Extras** | SwayNC, Cava, Btop, Cliphist |
+| **Window manager** | Hyprland using a Lua configuration; `dwindle` layout |
+| **Status bar** | Waybar: workspaces, CPU/GPU, memory, networking, audio, Bluetooth and clock |
+| **App launcher** | Rofi, `type-4/style-8` theme |
+| **Wallpapers** | Waypaper with Hyprpaper |
+| **Lock screen** | Hyprlock, clock/date and a blurred background |
+| **Power menu** | Wlogout with minimal text-based buttons |
+| **Login manager** | SDDM with `where_is_my_sddm_theme` |
+| **Terminal / shell** | Kitty, Fish, Starship |
+| **Files / GTK** | Thunar, GTK themes, Papirus and Notwaita-Black cursor |
+| **Extras** | SwayNC, Cava, Btop and Cliphist |
 
-Особенности: 6 закреплённых рабочих столов, управление окнами с клавиатуры, scratchpad, анимации, переключение RU/EN через `Alt + Shift`.
+**Highlights:** six persistent workspaces, keyboard-focused window management, a scratchpad, animated transitions and US/Russian layout switching with `Alt + Shift`.
 
 ## Installation
 
 > [!WARNING]
-> Это **снимок персонального окружения**, а не универсальный установщик Arch Linux. Проверяй пути и зависимости перед копированием. **Не копируй файлы поверх существующих настроек без резервной копии.** Все команды выполняются вручную.
+> This is a **snapshot of a personal desktop**, not a complete Arch Linux installer. Review the files and adapt hardware-specific settings before using them. **Back up existing configurations before copying anything.** There is no automated installer.
 
-### 1. Склонировать репозиторий
+### 1. Clone the repository
 
 ~~~bash
 git clone https://github.com/vampr5861-debug/arch-hyprland-dotfiles.git
 cd arch-hyprland-dotfiles
 ~~~
 
-### 2. Установить основные пакеты
+### 2. Install the main dependencies
 
-Для Arch Linux (официальные репозитории):
+For Arch Linux, using the official repositories:
 
 ~~~bash
 sudo pacman -S --needed git hyprland waybar rofi kitty thunar firefox \
@@ -84,30 +84,34 @@ sudo pacman -S --needed git hyprland waybar rofi kitty thunar firefox \
   xdg-desktop-portal-hyprland xdg-desktop-portal-gtk
 ~~~
 
-Дополнительно нужны `waypaper` и `wlogout` — на исходной машине они были сторонними пакетами. При наличии `yay`:
+`waypaper` and `wlogout` were installed as third-party packages on the original system. If you already use `yay`:
 
 ~~~bash
 yay -S --needed waypaper wlogout
 ~~~
 
-Списки **всех явно установленных** пакетов исходной системы находятся в [packages/](packages/). Не устанавливай их все подряд: там есть игры, браузеры и программы, не относящиеся к оформлению.
+These are the **main desktop dependencies**, not a guarantee that every optional keybinding will work out of the box. The [packages/](packages/) directory contains snapshots of the original system's explicitly installed packages; **do not install everything from those lists blindly**.
 
-### 3. Сделать резервную копию и скопировать нужные конфиги
+### 3. Back up and copy selected configurations
 
-В репозитории пользовательские настройки лежат в `home/.config/`. Можно переносить **выборочно**, например только Waybar:
+User configuration files are stored in `home/.config/`. Copy **only what you need**.
+
+Example: install the Waybar configuration. If you already have `~/.config/waybar/`, back it up first:
 
 ~~~bash
-# Если Waybar уже настроен, сперва сохрани старую папку:
 cp -a ~/.config/waybar ~/.config/waybar.backup
+~~~
 
-# Затем, находясь в корне клонированного репозитория:
+Then, from the root of this cloned repository:
+
+~~~bash
 mkdir -p ~/.config/waybar
 cp -a home/.config/waybar/. ~/.config/waybar/
 ~~~
 
-Если `~/.config/waybar` ещё нет, пропусти команду резервного копирования. Таким же образом можно перенести `hypr`, `rofi`, `kitty`, `waypaper`, `wlogout` и остальные папки из `home/.config/`.
+Skip the backup command if the destination directory does not yet exist. Follow the same approach for `hypr`, `rofi`, `kitty`, `waypaper`, `wlogout` and other folders within `home/.config/`.
 
-Для отдельно упакованных темы и курсора:
+For the included GTK theme and cursor:
 
 ~~~bash
 mkdir -p ~/.local/share/themes ~/.local/share/icons
@@ -115,138 +119,141 @@ cp -a home/.local/share/themes/Dracula-pink-accent ~/.local/share/themes/
 cp -a home/.local/share/icons/Notwaita-Black ~/.local/share/icons/
 ~~~
 
-Перед копированием убедись, что одноимённых папок с твоими настройками нет, или сохрани их отдельно.
+Check for existing directories with those names before copying. Preserve symlinks when transferring the cursor theme.
 
-### 4. SDDM — только при необходимости
+### 4. SDDM (optional; system-wide)
 
-Тема входа относится к **системным** файлам. Перед её заменой сделай резервную копию своего SDDM и проверь содержимое:
+SDDM uses system paths rather than the user's home directory. Inspect and back up your current SDDM configuration before changing it:
 
-- `system/usr/share/sddm/themes/where_is_my_sddm_theme/` — файлы темы и `theme.conf.user`.
-- `system/etc/sddm.conf.d/99-where-is-my-sddm.conf` — выбор темы.
+| Repository path | Destination |
+| :--- | :--- |
+| `system/usr/share/sddm/themes/where_is_my_sddm_theme/` | `/usr/share/sddm/themes/where_is_my_sddm_theme/` |
+| `system/etc/sddm.conf.d/99-where-is-my-sddm.conf` | `/etc/sddm.conf.d/99-where-is-my-sddm.conf` |
 
-После проверки их можно вручную перенести в соответствующие `/usr/share/sddm/themes/` и `/etc/sddm.conf.d/` с правами администратора. Не включай/отключай display manager вслепую, особенно если уже используешь другой экран входа.
+Copy manually with administrator privileges **only after reviewing the theme files and checking for conflicts**. Do not enable or replace your current display manager without confirming how your login session is configured.
 
-### 5. Подстроить под своё оборудование
+### 5. Adjust your setup
 
-В этом сетапе есть привязки к исходному компьютеру:
+Some settings are specific to the original computer:
 
-- **Монитор:** рабочие столы 1–6 привязаны к `DP-1` в [hyprland.lua](home/.config/hypr/hyprland.lua).
-- **Разрешение:** параметры запуска Wlogout рассчитаны на 2560×1440.
-- **Видеокарта:** датчик температуры в Waybar использует `nvidia-smi`; на AMD/Intel модуль нужно заменить или отключить.
-- **Обои:** Waypaper ссылается на `~/Pictures/wallhaven-n6y9zl.jpg`. Сам файл не включён из-за неподтверждённых прав на распространение — выбери свои обои.
-- **Шрифты:** могут понадобиться дополнительные Nerd Fonts, в том числе Iosevka для некоторых элементов Rofi.
-- **GTK:** в текущих конфигурациях указан `Materia-dark`; `Dracula-pink-accent` также включена для ручного выбора.
+- **Monitor:** persistent workspaces 1–6 use the output `DP-1` in [hyprland.lua](home/.config/hypr/hyprland.lua).
+- **Resolution:** Wlogout positioning was tuned for a 2560 × 1440 display.
+- **GPU:** Waybar's GPU temperature module uses `nvidia-smi`, which requires NVIDIA drivers. Adapt or disable it on other GPUs.
+- **CPU:** the Waybar CPU temperature module expects a sensor named `coretemp`.
+- **Wallpaper:** Waypaper references `~/Pictures/wallhaven-n6y9zl.jpg`. The image itself is not included due to unverified redistribution rights; choose your own wallpaper.
+- **Fonts:** some Rofi elements refer to Iosevka Nerd Font; other Nerd Fonts may also be useful.
+- **GTK:** the exported settings select `Materia-dark`. `Dracula-pink-accent` is included as a separately selectable theme.
 
-После запуска Hyprland проверь конфигурацию:
+Check your running Hyprland configuration:
 
 ~~~bash
 hyprctl configerrors
 ~~~
 
 > [!NOTE]
-> Версия Hyprland должна поддерживать используемый формат `hyprland.lua`. Совместимость со всеми релизами и видеокартами не проверялась. Сетап предназначен для ручной адаптации, без сомнительных `curl | sh`-установщиков.
+> Your Hyprland version must support the Lua configuration format used here. This setup has **not** been tested across all Hyprland releases, GPUs or display layouts. Review and adapt it manually rather than using an unverified `curl | sh` installer.
 
 ## Keybindings
 
-**`Super` = клавиша Windows.** Все сочетания ниже взяты из опубликованного [hyprland.lua](home/.config/hypr/hyprland.lua).
+**`Super` means the Windows / Meta key.** The bindings below document the exported [Hyprland configuration](home/.config/hypr/hyprland.lua).
 
-### Программы и система
+### Applications & system
 
-| Сочетание | Действие |
+| Shortcut | Action |
 | :--- | :--- |
-| <kbd>Super</kbd> + <kbd>Enter</kbd> | Kitty |
-| <kbd>Super</kbd> + <kbd>E</kbd> | Thunar |
-| <kbd>Super</kbd> + <kbd>B</kbd> | Firefox |
-| <kbd>Super</kbd> + <kbd>Space</kbd> / <kbd>Super</kbd> + <kbd>R</kbd> | Rofi: запуск приложений |
-| <kbd>Super</kbd> + <kbd>Shift</kbd> + <kbd>Space</kbd> | Rofi: переключение окон |
-| <kbd>Super</kbd> + <kbd>W</kbd> | Waypaper |
-| <kbd>Super</kbd> + <kbd>S</kbd> | Центр уведомлений SwayNC |
-| <kbd>Super</kbd> + <kbd>Shift</kbd> + <kbd>N</kbd> | Скрыть уведомления |
-| <kbd>Super</kbd> + <kbd>Shift</kbd> + <kbd>B</kbd> | Показать / скрыть Waybar |
-| <kbd>Super</kbd> + <kbd>L</kbd> | Заблокировать экран (Hyprlock) |
-| <kbd>Super</kbd> + <kbd>Esc</kbd> | Меню питания Wlogout |
-| <kbd>Print</kbd> | Снимок монитора в буфер обмена |
-| <kbd>Super</kbd> + <kbd>Shift</kbd> + <kbd>S</kbd> | Снимок области в буфер обмена |
-| <kbd>Alt</kbd> + <kbd>Shift</kbd> | Переключить RU/EN |
+| <kbd>Super</kbd> + <kbd>Enter</kbd> | Open Kitty |
+| <kbd>Super</kbd> + <kbd>E</kbd> | Open Thunar |
+| <kbd>Super</kbd> + <kbd>B</kbd> | Open Firefox |
+| <kbd>Super</kbd> + <kbd>Space</kbd> / <kbd>Super</kbd> + <kbd>R</kbd> | Rofi application launcher |
+| <kbd>Super</kbd> + <kbd>Shift</kbd> + <kbd>Space</kbd> | Rofi window switcher |
+| <kbd>Super</kbd> + <kbd>W</kbd> | Open Waypaper |
+| <kbd>Super</kbd> + <kbd>S</kbd> | SwayNC notification center |
+| <kbd>Super</kbd> + <kbd>Shift</kbd> + <kbd>N</kbd> | Dismiss notifications |
+| <kbd>Super</kbd> + <kbd>Shift</kbd> + <kbd>B</kbd> | Toggle Waybar visibility |
+| <kbd>Super</kbd> + <kbd>L</kbd> | Lock the screen with Hyprlock |
+| <kbd>Super</kbd> + <kbd>Esc</kbd> | Open Wlogout |
+| <kbd>Print</kbd> | Copy an output screenshot to the clipboard |
+| <kbd>Super</kbd> + <kbd>Shift</kbd> + <kbd>S</kbd> | Copy a region screenshot to the clipboard |
+| <kbd>Alt</kbd> + <kbd>Shift</kbd> | Switch US / Russian keyboard layout |
 
-### Окна и раскладка
+### Window management
 
-| Сочетание | Действие |
+| Shortcut | Action |
 | :--- | :--- |
-| <kbd>Super</kbd> + <kbd>Q</kbd> | Закрыть окно |
-| <kbd>Super</kbd> + <kbd>Ctrl</kbd> + <kbd>Q</kbd> | Принудительно завершить окно |
-| <kbd>Super</kbd> + <kbd>V</kbd> | Переключить tiled / floating |
-| <kbd>Super</kbd> + <kbd>F</kbd> | Полный экран |
-| <kbd>Super</kbd> + <kbd>M</kbd> | Максимизация |
-| <kbd>Super</kbd> + <kbd>P</kbd> | Pseudotile |
-| <kbd>Super</kbd> + <kbd>Shift</kbd> + <kbd>P</kbd> | Закрепить плавающее окно |
-| <kbd>Super</kbd> + <kbd>← ↑ ↓ →</kbd> | Переместить фокус |
-| <kbd>Super</kbd> + <kbd>Shift</kbd> + <kbd>← ↑ ↓ →</kbd> | Переместить окно |
-| <kbd>Super</kbd> + <kbd>Ctrl</kbd> + <kbd>← ↑ ↓ →</kbd> | Изменить размер окна |
-| <kbd>Super</kbd> + <kbd>Alt</kbd> + <kbd>← ↑ ↓ →</kbd> | Поменять окна местами |
-| <kbd>Super</kbd> + <kbd>Tab</kbd> | Перейти к следующему окну |
-| <kbd>Super</kbd> + <kbd>Shift</kbd> + <kbd>T</kbd> | Swap split (dwindle) |
-| <kbd>Super</kbd> + <kbd>ЛКМ</kbd> / <kbd>ПКМ</kbd> | Перетаскивать / изменять размер окна |
+| <kbd>Super</kbd> + <kbd>Q</kbd> | Close focused window |
+| <kbd>Super</kbd> + <kbd>Ctrl</kbd> + <kbd>Q</kbd> | Force-kill focused window |
+| <kbd>Super</kbd> + <kbd>V</kbd> | Toggle tiling / floating |
+| <kbd>Super</kbd> + <kbd>F</kbd> | Toggle fullscreen |
+| <kbd>Super</kbd> + <kbd>M</kbd> | Toggle maximized state |
+| <kbd>Super</kbd> + <kbd>P</kbd> | Toggle pseudotiling |
+| <kbd>Super</kbd> + <kbd>Shift</kbd> + <kbd>P</kbd> | Pin floating window |
+| <kbd>Super</kbd> + <kbd>← ↑ ↓ →</kbd> | Focus a window |
+| <kbd>Super</kbd> + <kbd>Shift</kbd> + <kbd>← ↑ ↓ →</kbd> | Move a window |
+| <kbd>Super</kbd> + <kbd>Ctrl</kbd> + <kbd>← ↑ ↓ →</kbd> | Resize a window |
+| <kbd>Super</kbd> + <kbd>Alt</kbd> + <kbd>← ↑ ↓ →</kbd> | Swap windows |
+| <kbd>Super</kbd> + <kbd>Tab</kbd> | Cycle windows |
+| <kbd>Super</kbd> + <kbd>Shift</kbd> + <kbd>T</kbd> | Swap Dwindle split |
+| <kbd>Super</kbd> + <kbd>left/right mouse button</kbd> | Move / resize a window |
 
-### Рабочие столы
+### Workspaces & scratchpad
 
-| Сочетание | Действие |
+| Shortcut | Action |
 | :--- | :--- |
-| <kbd>Super</kbd> + <kbd>1–6</kbd> | Перейти на рабочий стол |
-| <kbd>Super</kbd> + <kbd>Shift</kbd> + <kbd>1–6</kbd> | Отправить окно на рабочий стол |
-| <kbd>Super</kbd> + <kbd>Колесо мыши</kbd> | Переключать рабочие столы |
-| <kbd>Super</kbd> + <kbd>\`</kbd> | Показать / скрыть scratchpad |
-| <kbd>Super</kbd> + <kbd>Shift</kbd> + <kbd>\`</kbd> | Отправить окно в scratchpad |
-| <kbd>Super</kbd> + <kbd>G</kbd> | Группировка окон |
+| <kbd>Super</kbd> + <kbd>1–6</kbd> | Switch workspace |
+| <kbd>Super</kbd> + <kbd>Shift</kbd> + <kbd>1–6</kbd> | Move a window to workspace |
+| <kbd>Super</kbd> + <kbd>mouse wheel</kbd> | Cycle workspaces |
+| <kbd>Super</kbd> + <kbd>\`</kbd> | Toggle scratchpad |
+| <kbd>Super</kbd> + <kbd>Shift</kbd> + <kbd>\`</kbd> | Move window to scratchpad |
+| <kbd>Super</kbd> + <kbd>G</kbd> | Toggle window grouping |
 
-### Кнопки Wlogout
+### Wlogout controls
 
-| Клавиша | Действие |
+| Key | Action |
 | :--- | :--- |
-| <kbd>S</kbd> | Выключить |
-| <kbd>R</kbd> | Перезагрузить |
-| <kbd>E</kbd> | Выйти из сессии |
-| <kbd>L</kbd> | Заблокировать |
+| <kbd>S</kbd> | Shut down |
+| <kbd>R</kbd> | Reboot |
+| <kbd>E</kbd> | Log out |
+| <kbd>L</kbd> | Lock |
 
-Публикуемая конфигурация Wlogout использует **текстовые кнопки**: оригинальные PNG-иконки не включены из-за неизвестного происхождения.
+The public Wlogout configuration uses **text labels** instead of the original PNG icons, whose license could not be established.
 
 ## Structure
 
 ~~~text
 arch-hyprland-dotfiles/
 ├── home/
-│   ├── .config/            # Hyprland, Waybar, Rofi, Kitty и др.
+│   ├── .config/            # Hyprland, Waybar, Rofi, Kitty, etc.
 │   └── .local/share/      # Dracula GTK, Notwaita cursor
-├── system/                # SDDM config + theme
-├── screenshots/           # Реальные скриншоты
-├── assets/                # Примечания об обоях и ресурсах
-├── packages/              # Списки пакетов исходной системы
-├── extras/                # Неиспользуемые скрипты (не устанавливать)
-├── LICENSES/              # Уведомления и лицензии
-├── AUDIT.md               # Аудит исходных конфигов
+├── system/                # SDDM config and theme
+├── screenshots/           # Real desktop previews
+├── assets/                # Wallpaper and third-party asset notes
+├── packages/              # Package snapshots and dependency notes
+├── extras/                # Unreferenced scripts (not installed)
+├── LICENSES/              # Third-party licenses and notices
+├── AUDIT.md               # Configuration audit
 └── README.md
 ~~~
 
 ## Notes
 
-- В репозитории **нет автоматического установочного скрипта**. Все настройки копируются выборочно и вручную.
-- Это копия конфигов на дату **5 ноября 2026 года**. Новые изменения живой системы не попадают сюда сами собой.
-- На скриншотах показаны сторонние обои, но сами файлы этих обоев не распространяются.
-- Системные и пользовательские пути, шрифты и драйверы могут потребовать настройки.
-- `extras/unreferenced-scripts/` сохранены для истории; они **не входят в активную конфигурацию**.
-- Перед публикацией собственных изменений не добавляйте секреты, токены, приватные ключи и данные приложений.
+- This repository **does not ship an automatic installer**. Copy configurations manually and selectively.
+- Configurations were captured on **November 5, 2026**; later changes to the live system are not synchronized automatically.
+- Third-party wallpapers shown in screenshots are **not included**.
+- Paths, fonts, display layout and drivers may require adjustments.
+- `extras/unreferenced-scripts/` contains scripts preserved for reference; they are **not part of the active setup**.
+- Never commit credentials, personal tokens, private keys, application sessions or other private files.
 
 ## Credits
 
-Спасибо разработчикам и авторам оригинальных проектов:
+Thanks to the creators and contributors of these projects:
 
-- **[Hyprland](https://hypr.land/)**, **[Waybar](https://github.com/Alexays/Waybar)**, **[Rofi](https://github.com/davatorium/rofi)** и остальным open-source проектам.
-- **[Where is my SDDM theme?](https://github.com/stepanzubkov/where-is-my-sddm-theme)** — Степан Зубков, MIT.
-- **[adi1090x/rofi](https://github.com/adi1090x/rofi)** — элементы Rofi, GPL-3.0.
-- **[Dracula GTK](https://github.com/dracula/gtk)** — Eliver Lara и участники, GPL-3.0.
-- **[Notwaita Cursor](https://github.com/ful1e5/notwaita-cursor)** — см. [уведомление о лицензировании](LICENSES/notwaita-cursor-NOTICE.md).
+- **[Hyprland](https://hypr.land/)**, **[Waybar](https://github.com/Alexays/Waybar)**, **[Rofi](https://github.com/davatorium/rofi)** and the other open-source components used here.
+- **[Where is my SDDM theme?](https://github.com/stepanzubkov/where-is-my-sddm-theme)** — Stepan Zubkov, MIT.
+- **[adi1090x/rofi](https://github.com/adi1090x/rofi)** — Rofi theme components, GPL-3.0.
+- **[Dracula GTK](https://github.com/dracula/gtk)** — Eliver Lara and contributors, GPL-3.0.
+- **[Notwaita Cursor](https://github.com/ful1e5/notwaita-cursor)** — see the [licensing notice](LICENSES/notwaita-cursor-NOTICE.md).
 
-Подробности о сторонних лицензиях находятся в [LICENSES/](LICENSES/) и каталогах соответствующих тем. **Общая лицензия на авторские конфиги пока не выбрана**.
+Third-party license details are retained in [LICENSES/](LICENSES/) and the relevant theme directories. **No overall license has been selected for the original dotfiles**; third-party code retains its own terms.
 
 ---
 
