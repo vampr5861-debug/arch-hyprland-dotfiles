@@ -9,7 +9,7 @@ A personal desktop configuration with a quiet dark palette, compact controls, su
 [![Configuration checks](https://github.com/vampr5861-debug/arch-hyprland-dotfiles/actions/workflows/validate.yml/badge.svg)](https://github.com/vampr5861-debug/arch-hyprland-dotfiles/actions/workflows/validate.yml)
 ![Arch Linux](https://img.shields.io/badge/Arch%20Linux-1793D1?style=flat-square&logo=archlinux&logoColor=white)
 
-[**Desktop**](#desktop) · [**Features**](#features) · [**Get started**](#get-started) · [**Customize**](docs/CUSTOMIZATION.md) · [**Keybindings**](docs/KEYBINDINGS.md)
+[**Desktop**](#desktop) · [**Features**](#features) · [**Get started**](#get-started) · [**Installer**](docs/INSTALLER.md) · [**Customize**](docs/CUSTOMIZATION.md) · [**Keybindings**](docs/KEYBINDINGS.md)
 
 </div>
 
@@ -62,24 +62,39 @@ These are **configuration snapshots**, not bundled replacements for the applicat
 
 ## Get started
 
-MOMO is intended for an **existing Arch Linux installation** with working graphics drivers and a usable Wayland session. There is no one-click installer, and copying every file into a live desktop is neither necessary nor recommended.
+MOMO targets an **existing Arch Linux installation** with working graphics drivers and a usable Wayland session. It is not an Arch installer, and the provided desktop configuration is hardware-specific.
 
 ```bash
 git clone https://github.com/vampr5861-debug/arch-hyprland-dotfiles.git
 cd arch-hyprland-dotfiles
 ```
 
-1. **Read** the [installation guide](docs/INSTALLATION.md) and check the required packages.
-2. **Back up** each destination before copying or replacing configuration files.
-3. **Select** only the components you want; adapt machine-specific values before starting the session.
-4. **Verify** the result using the [troubleshooting checks](docs/TROUBLESHOOTING.md) and keep your backup for rollback.
+### Optional interactive installer
+
+MOMO includes a terminal installer using the official Arch `dialog` package. It lets you choose individual desktop components and **skip, download all, or select specific wallpapers** from a link-only Wallhaven catalog. It moves existing selected configurations into a private backup before replacement; it does not install software packages or restart your desktop.
+
+```bash
+sudo pacman -S --needed dialog
+bash install.sh --check
+bash install.sh --dry-run
+bash install.sh
+```
+
+Read the [installer guide](docs/INSTALLER.md) **before applying** anything. Run it as a regular user, not with `sudo`. The downloadable artwork is **not hosted in this repository** and may have disappeared or changed; original file checksums are verified before installation.
+
+### Manual installation
+
+1. **Read** the [manual installation guide](docs/INSTALLATION.md) and check the required packages.
+2. **Back up** every destination before replacing configuration files.
+3. **Copy** only the components you want, adjusting hardware-specific values before starting the session.
+4. **Verify** the result using the [troubleshooting checks](docs/TROUBLESHOOTING.md) and keep your backups for rollback.
 
 > [!IMPORTANT]
 > The lists under [`packages/`](packages/) are historical package snapshots, **not** an installation manifest. They contain unrelated applications and should not be installed wholesale.
 
 ## Make it yours
 
-The [configuration guide](docs/CUSTOMIZATION.md) maps the actual files to the settings they control and explains how to adjust them **without a custom installation framework or helper scripts**.
+The [configuration guide](docs/CUSTOMIZATION.md) maps the actual files to the settings they control and explains how to adjust them using the **native configuration features of each application**.
 
 | Change | Where to look |
 | :--- | :--- |
