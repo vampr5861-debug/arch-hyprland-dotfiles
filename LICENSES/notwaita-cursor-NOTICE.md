@@ -1,17 +1,12 @@
-# Сторонний курсор Notwaita-Black
+# Notwaita-Black Cursor — Third-Party Notice
 
-Этот каталог взят из переданного пользователем архива установленной темы.
-`icons/Notwaita-Black/index.theme` указывает на форк `@ful1e5`.
+The `Notwaita-Black` directory came from the locally installed theme supplied by the repository owner. Its `index.theme` identifies the `@ful1e5` fork.
 
-- Разработчики / проект: https://github.com/ful1e5/notwaita-cursor
-- Оригинальный проект: https://gitlab.com/donut2/notwaita-cursor-theme
-- В файле `COPYING` upstream для художественных материалов указаны варианты
-  LGPLv3 или Creative Commons BY-SA 3.0 US.
-- Полные условия / атрибуция: https://github.com/ful1e5/notwaita-cursor/blob/main/COPYING
-- Лицензия Creative Commons BY-SA 3.0 US: https://creativecommons.org/licenses/by-sa/3.0/us/
-- По уведомлению upstream, для атрибуции оригинальных изображений достаточно
-  указать GNOME Project: https://www.gnome.org/
+- **Fork and maintainers:** https://github.com/ful1e5/notwaita-cursor
+- **Original project:** https://gitlab.com/donut2/notwaita-cursor-theme
+- **Upstream `COPYING`:** describes LGPLv3 or Creative Commons Attribution-ShareAlike 3.0 United States terms for the artwork.
+- **License and attribution details:** https://github.com/ful1e5/notwaita-cursor/blob/main/COPYING
+- **CC BY-SA 3.0 US:** https://creativecommons.org/licenses/by-sa/3.0/us/
+- The upstream notice says that crediting the **GNOME Project** is sufficient for the original artwork: https://www.gnome.org/
 
-**Этот курсор не является авторской работой владельца dotfiles.**
-Это ссылка на происхождение и условия распространения, а не смена лицензии.
-SVG-исходники курсоров доступны в upstream-репозитории.
+**The cursor artwork is not the original work of this dotfiles repository owner.** This notice records provenance and relevant distribution terms; it does not replace or relicense upstream content. SVG sources are available in the upstream repository.
