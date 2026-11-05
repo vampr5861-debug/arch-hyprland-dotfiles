@@ -1,5 +1,5 @@
 #!/usr/bin/env python3
-"""MOMO installer: standard-library file handling and a native dialog UI.
+"""MOMO installer: standard-library file handling and a Gum terminal UI.
 
 No package manager calls, no sudo, no changes to a running Wayland session.
 """
@@ -23,7 +23,6 @@ import urllib.request
 
 ROOT = Path(__file__).resolve().parent.parent
 CATALOG = ROOT / "wallpapers" / "catalog.json"
-DIALOG_THEME = ROOT / "assets" / "dialog" / "momo.dialogrc"
 
 # Every entry is a repository-relative source and a home-relative destination.
 # There is deliberately no automatic system-wide SDDM or package installation.
@@ -83,8 +82,6 @@ def load_catalog(path: Path = CATALOG) -> list[dict]:
 
 def check_tree() -> list[dict]:
     entries = load_catalog()
-    if not DIALOG_THEME.is_file():
-        raise InstallerError("Missing installer theme: assets/dialog/momo.dialogrc")
     for key, (_, paths) in COMPONENTS.items():
         for source, _ in paths:
             if not (ROOT / source).exists():
@@ -94,78 +91,206 @@ def check_tree() -> list[dict]:
     return entries
 
 
-def run_dialog(*args: str) -> str | None:
-    if not DIALOG_THEME.is_file():
-        raise InstallerError("Installer dialog theme is missing")
-    command = ["dialog", "--stdout", "--clear", "--colors", "--no-shadow",
-               "--cr-wrap", "--visit-items", "--backtitle",
-               "MOMO   /   Arch Linux + Hyprland", *args]
-    # DIALOGRC is scoped to this process; the user's ~/.dialogrc is untouched.
-    env = {**os.environ, "DIALOGRC": str(DIALOG_THEME)}
-    result = subprocess.run(command, stdout=subprocess.PIPE, text=True, check=False, env=env)
-    if result.returncode in (1, 255):
+# Gum's documented CLI provides the display layer; it is never used for file writes.
+# All choices use fixed IDs returned through --label-delimiter, never shell evaluation.
+GUM_ENV = {
+    "GUM_CHOOSE_CURSOR_FOREGROUND": "#50D6D8",
+    "GUM_CHOOSE_HEADER_FOREGROUND": "#50D6D8",
+    "GUM_CHOOSE_SELECTED_FOREGROUND": "#50D6D8",
+    "GUM_CONFIRM_SELECTED_FOREGROUND": "#50D6D8",
+}
+PROFILES = {
+    "minimal": ["hyprland", "waybar", "rofi", "kitty"],
+    "complete": list(COMPONENTS),
+}
+
+
+def run_gum(*args: str) -> subprocess.CompletedProcess:
+    env = {**os.environ, **GUM_ENV}
+    try:
+        return subprocess.run(["gum", *args], stdout=subprocess.PIPE,
+                              text=True, check=False, env=env)
+    except FileNotFoundError as exc:
+        raise InstallerError("Gum is required: sudo pacman -S --needed gum") from exc
+
+
+def show_heading(title: str, subtitle: str = "") -> None:
+    result = run_gum("style", "--foreground", "#50D6D8", "--border", "rounded",
+                     "--border-foreground", "#343C44", "--padding", "1 2",
+                     f"MOMO / {title}\n{subtitle}".rstrip())
+    if result.returncode:
+        raise InstallerError("gum style failed")
+    print(result.stdout, flush=True)
+
+
+def gum_choose(header: str, choices: list[tuple[str, str]],
+               multiple: bool = False, height: int = 12) -> list[str] | None:
+    if not choices:
+        return []
+    options = [f"{label}::{key}" for key, label in choices]
+    cmd = ["choose", "--label-delimiter", "::", "--header", header,
+           "--height", str(min(height, len(choices)))]
+    if multiple:
+        cmd.append("--no-limit")
+    result = run_gum(*cmd, *options)
+    if result.returncode in (1, 130):
         return None
-    if result.returncode != 0:
-        raise InstallerError(f"dialog failed with exit code {result.returncode}")
-    return result.stdout.strip()
+    if result.returncode:
+        raise InstallerError(f"gum choose failed ({result.returncode})")
+    chosen = result.stdout.splitlines()
+    known = {key for key, _ in choices}
+    if any(key not in known for key in chosen) or len(chosen) != len(set(chosen)):
+        raise InstallerError("Unexpected selection returned by Gum")
+    if not multiple and len(chosen) != 1:
+        raise InstallerError("Expected a single menu selection")
+    return chosen
+
+
+def gum_confirm(prompt: str) -> bool:
+    result = run_gum("confirm", "--default=false", "--affirmative", "Proceed",
+                     "--negative", "Cancel", prompt)
+    if result.returncode == 0:
+        return True
+    if result.returncode in (1, 130):
+        return False
+    raise InstallerError(f"gum confirm failed ({result.returncode})")
 
 
 def select_options(catalog: list[dict]) -> tuple[list[str], list[dict]] | None:
-    welcome = ("\\ZbMOMO DOTFILES\\Zn\n\n"
-               "Select only the components you want. Your existing settings are "
-               "moved into a private backup before any replacement.\n\n"
-               "No packages are installed; the live desktop is not reloaded. "
-               "System-wide SDDM setup remains manual.")
-    if run_dialog("--title", "Welcome", "--msgbox", welcome, "13", "78") is None:
+    show_heading("INSTALLER", "Selective configuration · private backups · no sudo")
+    profile = gum_choose("01 / Choose installation profile", [
+        ("minimal", "Minimal      · Hyprland, Waybar, Rofi, Kitty"),
+        ("complete", "Complete     · All 11 component groups"),
+        ("custom", "Custom       · Choose individual components"),
+    ], height=3)
+    if profile is None:
         return None
-
-    menu = ["--title", "Desktop components", "--separate-output", "--checklist",
-            "Space: toggle    |    Enter: continue    |    Esc: cancel",
-            "21", "82", "13"]
-    for key, (label, _) in COMPONENTS.items():
-        menu += [key, label, "off"]
-    menu += ["wallpapers", f"Wallhaven collection ({len(catalog)} files)", "off"]
-    selected = run_dialog(*menu)
-    if selected is None:
-        return None
-    keys = selected.splitlines() if selected else []
-    unknown = set(keys) - set(COMPONENTS) - {"wallpapers"}
-    if unknown:
-        raise InstallerError(f"Unexpected component selections: {unknown}")
-
-    wallpaper_items = []
-    if "wallpapers" in keys:
-        mode = run_dialog("--title", "Wallpapers", "--menu",
-                          "Select how to import wallpapers into ~/Pictures (used by Waypaper).",
-                          "14", "85", "4",
-                          "all", f"Download all {len(catalog)} original files",
-                          "choose", "Choose individual wallpapers",
-                          "skip", "Do not download wallpapers")
-        if mode is None:
+    if profile[0] == "custom":
+        selection = gum_choose("02 / Space to select · Enter to continue", [
+            (key, label) for key, (label, _) in COMPONENTS.items()
+        ], multiple=True, height=11)
+        if selection is None:
             return None
-        if mode == "all":
-            wallpaper_items = catalog
-        elif mode == "choose":
-            choices = ["--title", "Choose wallpapers", "--separate-output", "--checklist",
-                       "Choose by Wallhaven ID / dimensions. Original artwork is not bundled.",
-                       "21", "85", "13"]
-            for item in catalog:
-                choices += [item["id"],
-                            f'{item["width"]}x{item["height"]}  {item["bytes"] // 1048576} MiB  {item["filename"].split(".")[-1]}',
-                            "off"]
-            picked = run_dialog(*choices)
-            if picked is None:
-                return None
-            picked_ids = set(picked.splitlines()) if picked else set()
-            wallpaper_items = [w for w in catalog if w["id"] in picked_ids]
-            if len(wallpaper_items) != len(picked_ids):
-                raise InstallerError("Unexpected wallpaper selection")
-        elif mode != "skip":
-            raise InstallerError("Unexpected wallpaper download mode")
-    keys = [key for key in keys if key != "wallpapers"]
+        keys = [key for key in COMPONENTS if key in selection]
+    else:
+        keys = PROFILES[profile[0]].copy()
+
+    mode = gum_choose("03 / Wallpaper collection (optional)", [
+        ("skip", "Skip wallpaper downloads"),
+        ("all", f"Download all {len(catalog)} originals · verified SHA-256"),
+        ("choose", "Pick individual wallpapers by Wallhaven ID"),
+    ], height=3)
+    if mode is None:
+        return None
+    wallpaper_items = []
+    if mode[0] == "all":
+        wallpaper_items = catalog
+    elif mode[0] == "choose":
+        picked = gum_choose("Space to select · Enter to continue", [
+            (item["id"], f'{item["id"]}  {item["width"]}×{item["height"]}  '
+                         f'{item["bytes"] / 1048576:.1f} MiB  {item["filename"].split(".")[-1].upper()}')
+            for item in catalog
+        ], multiple=True, height=14)
+        if picked is None:
+            return None
+        ids = set(picked)
+        wallpaper_items = [item for item in catalog if item["id"] in ids]
     if not keys and not wallpaper_items:
         raise InstallerError("Nothing selected; no changes made")
     return keys, wallpaper_items
+
+
+def component_requirements(keys: list[str]) -> list[tuple[str, bool]]:
+    commands = {
+        "hyprland": ("Hyprland",), "waybar": ("waybar",),
+        "rofi": ("rofi",), "kitty": ("kitty",),
+        "fish": ("fish", "starship"), "waypaper": ("waypaper",),
+        "wlogout": ("wlogout",), "thunar": ("thunar",),
+        "gtk": ("nwg-look",), "cursor": (), "cava": ("cava",),
+    }
+    return [(exe, shutil.which(exe) is not None) for key in keys for exe in commands[key]]
+
+
+def print_preflight(keys: list[str]) -> None:
+    missing = [exe for exe, present in component_requirements(keys) if not present]
+    if missing:
+        print("\nMissing optional application commands:", ", ".join(sorted(set(missing))))
+        print("MOMO installs configuration files only; use the official Arch packages as appropriate.")
+    if "hyprland" in keys:
+        print("Compatibility: workspace rules target DP-1; check Hyprland Lua API and your monitor.")
+    if "waybar" in keys:
+        print("Compatibility: NVIDIA/coretemp modules and ext/workspaces may need adjustments.")
+
+
+def same_tree(source: Path, target: Path) -> bool:
+    """Compare bytes, file modes and relative symlink values without following links."""
+    if source.is_symlink() or target.is_symlink():
+        return source.is_symlink() and target.is_symlink() and os.readlink(source) == os.readlink(target)
+    if source.is_dir() != target.is_dir() or source.is_file() != target.is_file():
+        return False
+    if not target.exists():
+        return False
+    if source.is_dir():
+        if source.stat().st_mode & 0o777 != target.stat().st_mode & 0o777:
+            return False
+        src_names = {p.name for p in source.iterdir()}
+        if src_names != {p.name for p in target.iterdir()}:
+            return False
+        return all(same_tree(source / name, target / name) for name in src_names)
+    if source.is_file():
+        if source.stat().st_size != target.stat().st_size:
+            return False
+        if source.stat().st_mode & 0o777 != target.stat().st_mode & 0o777:
+            return False
+        with source.open("rb") as a, target.open("rb") as b:
+            while True:
+                left, right = a.read(1048576), b.read(1048576)
+                if left != right:
+                    return False
+                if not left:
+                    return True
+    return False
+
+
+def selected_paths(keys: list[str]) -> list[tuple[str, str]]:
+    chosen = []
+    for key in keys:
+        if key not in COMPONENTS:
+            raise InstallerError(f"Unknown component: {key}")
+        chosen.extend(COMPONENTS[key][1])
+    if len({dest for _, dest in chosen}) != len(chosen):
+        raise InstallerError("Duplicate installation destinations")
+    return chosen
+
+
+def build_plan(keys: list[str], home: Path, root: Path = ROOT) -> list[tuple[str, str]]:
+    entries = []
+    for source, relative in selected_paths(keys):
+        src, target = root / source, home / relative
+        if not src.exists():
+            raise InstallerError(f"Missing source: {source}")
+        validate_source_symlinks(src)
+        reject_symlink_ancestors(target.parent, stop=home)
+        status = ("UNCHANGED" if same_tree(src, target) else
+                  "REPLACE" if target.exists() or target.is_symlink() else "ADD")
+        entries.append((relative, status))
+    return entries
+
+
+def print_plan(keys: list[str], wallpapers: list[dict], home: Path) -> None:
+    print("\n04 / REVIEW FILE CHANGES")
+    plan = build_plan(keys, home)
+    for relative, status in plan:
+        print(f"  {status:<9} {relative}")
+    if not plan:
+        print("  No configuration changes selected")
+    size_mib = sum(w["bytes"] for w in wallpapers) / 1048576
+    print(f"\nWallpaper originals selected: {len(wallpapers)} (~{size_mib:.0f} MiB; destination: ~/Pictures)")
+    print_preflight(keys)
+    if any(status == "REPLACE" for _, status in plan):
+        print("Existing components will be moved into a private backup before replacement.")
+    print("No package installation, sudo, SDDM changes or desktop reloads are performed.\n")
+
 
 
 def state_directory(home: Path) -> Path:
@@ -211,27 +336,23 @@ def atomic_write_json(path: Path, obj: dict) -> None:
 
 
 def install_components(keys: list[str], home: Path, root: Path = ROOT) -> Path | None:
-    if not keys:
+    chosen = selected_paths(keys)
+    if not chosen:
         return None
-    chosen = []
-    for key in keys:
-        if key not in COMPONENTS:
-            raise InstallerError(f"Unknown component: {key}")
-        chosen.extend(COMPONENTS[key][1])
-    if len({dest for _, dest in chosen}) != len(chosen):
-        raise InstallerError("Duplicate installation destinations")
+    plan = build_plan(keys, home, root)
+    operations = [pair for pair, (_, status) in zip(chosen, plan) if status != "UNCHANGED"]
+    if not operations:
+        print("All selected configurations are already identical; nothing replaced.")
+        return None
 
     state = state_directory(home)
     reject_symlink_ancestors(state, stop=home)
     state.mkdir(parents=True, exist_ok=True, mode=0o700)
     os.chmod(state, 0o700)
-    # Stage all copies before modifying even one destination.
     with tempfile.TemporaryDirectory(prefix="momo-stage-", dir=state) as stagedir:
         stage = Path(stagedir)
-        for source, destination in chosen:
+        for source, destination in operations:
             src, dst = root / source, stage / destination
-            if not src.exists():
-                raise InstallerError(f"Missing source: {source}")
             validate_source_symlinks(src)
             dst.parent.mkdir(parents=True, exist_ok=True)
             if src.is_dir():
@@ -240,13 +361,13 @@ def install_components(keys: list[str], home: Path, root: Path = ROOT) -> Path |
                 shutil.copy2(src, dst, follow_symlinks=False)
 
         backup_parent = state / "backups"
+        reject_symlink_ancestors(backup_parent, stop=home)
         backup_parent.mkdir(exist_ok=True, mode=0o700)
         backup_root = Path(tempfile.mkdtemp(prefix="session-", dir=backup_parent))
         applied = []
         try:
-            for _, relative in chosen:
+            for _, relative in operations:
                 target = home / relative
-                # Refuse traversing user-managed top-level config symlinks.
                 reject_symlink_ancestors(target.parent, stop=home)
                 target.parent.mkdir(parents=True, exist_ok=True)
                 backup = backup_root / relative
@@ -280,6 +401,98 @@ def install_components(keys: list[str], home: Path, root: Path = ROOT) -> Path |
                 except OSError as restore_error:
                     print(f"Manual recovery required for {target}: {restore_error}", file=sys.stderr)
             raise
+
+
+def list_sessions(home: Path) -> list[Path]:
+    backups = state_directory(home) / "backups"
+    reject_symlink_ancestors(backups, stop=home)
+    if not backups.is_dir():
+        return []
+    return sorted((p for p in backups.iterdir() if p.is_dir() and not p.is_symlink()
+                   and p.name.startswith("session-") and (p / "install-record.json").is_file()),
+                  key=lambda p: p.stat().st_mtime, reverse=True)
+
+
+def read_session(session: Path, home: Path) -> list[tuple[str, bool]]:
+    if session.is_symlink() or not session.is_dir() or not session.name.startswith("session-"):
+        raise InstallerError("Invalid backup session")
+    allowed = {dest for _, dest in selected_paths(list(COMPONENTS))}
+    raw = json.loads((session / "install-record.json").read_text(encoding="utf-8"))
+    if not isinstance(raw, dict) or raw.get("version") != 1 or not isinstance(raw.get("files"), list):
+        raise InstallerError("Unsupported backup manifest")
+    result = []
+    for entry in raw["files"]:
+        if (not isinstance(entry, dict) or entry.get("destination") not in allowed
+                or type(entry.get("previous_version")) is not bool):
+            raise InstallerError("Invalid backup manifest entry")
+        relative, was_present = entry["destination"], entry["previous_version"]
+        if relative in {r for r, _ in result}:
+            raise InstallerError("Duplicate backup destination")
+        old = session / relative
+        if was_present and not (old.exists() or old.is_symlink()):
+            raise InstallerError(f"Missing original in backup: {relative}")
+        reject_symlink_ancestors((home / relative).parent, stop=home)
+        result.append((relative, was_present))
+    if not result:
+        raise InstallerError("Empty backup manifest")
+    return result
+
+
+def restore_session(session: Path, home: Path) -> Path:
+    """Restore a recorded install; keep both the saved originals and current files."""
+    saved = read_session(session, home)
+    state = state_directory(home)
+    reject_symlink_ancestors(state, stop=home)
+    restore_parent = state / "backups"
+    reject_symlink_ancestors(restore_parent, stop=home)
+    with tempfile.TemporaryDirectory(prefix="momo-restore-stage-", dir=state) as tmp:
+        stage = Path(tmp)
+        for relative, was_present in saved:
+            if not was_present:
+                continue
+            source, copy = session / relative, stage / relative
+            copy.parent.mkdir(parents=True, exist_ok=True)
+            if source.is_dir() and not source.is_symlink():
+                shutil.copytree(source, copy, symlinks=True)
+            else:
+                shutil.copy2(source, copy, follow_symlinks=False)
+        restore_root = Path(tempfile.mkdtemp(prefix="restore-", dir=restore_parent))
+        applied = []
+        try:
+            for relative, was_present in saved:
+                target = home / relative
+                reject_symlink_ancestors(target.parent, stop=home)
+                target.parent.mkdir(parents=True, exist_ok=True)
+                current = restore_root / relative
+                had_current = target.exists() or target.is_symlink()
+                entry = {"target": target, "current": current,
+                         "moved_current": False, "restored": False}
+                applied.append(entry)
+                if had_current:
+                    current.parent.mkdir(parents=True, exist_ok=True)
+                    target.rename(current)
+                    entry["moved_current"] = True
+                if was_present:
+                    (stage / relative).rename(target)
+                    entry["restored"] = True
+            atomic_write_json(restore_root / "restore-record.json", {
+                "version": 1, "source": session.name,
+                "files": [{"destination": r, "previous_version": present} for r, present in saved]
+            })
+            print(f"Restored {len(saved)} entries from {session.name}.")
+            print(f"Pre-restore settings preserved at: {restore_root}")
+            return restore_root
+        except Exception:
+            for entry in reversed(applied):
+                try:
+                    if entry["restored"]:
+                        entry["target"].rename(stage / entry["target"].relative_to(home))
+                    if entry["moved_current"]:
+                        entry["current"].rename(entry["target"])
+                except OSError as exc:
+                    print(f"Manual restore required for {entry['target']}: {exc}", file=sys.stderr)
+            raise
+
 
 
 def allowed_image_url(value: str, wall_id: str, filename: str) -> bool:
@@ -392,49 +605,96 @@ def download_wallpapers(selected: list[dict], home: Path, interval: float = 1.5)
     successes, failures = 0, 0
     print(f"Wallpapers destination: {destination}", flush=True)
     for index, item in enumerate(selected, 1):
-        try:
-            msg = download_one(item, destination)
-            successes += 1
-            print(f"[{index}/{len(selected)}] {msg}", flush=True)
-        except (InstallerError, OSError, ValueError, urllib.error.URLError) as err:
-            failures += 1
-            print(f"[{index}/{len(selected)}] FAILED {item['id']}: {err}", file=sys.stderr, flush=True)
+        for attempt in range(3):
+            try:
+                msg = download_one(item, destination)
+                successes += 1
+                print(f"[{index}/{len(selected)}] {msg}", flush=True)
+                break
+            except urllib.error.HTTPError as err:
+                # Only temporary API/server failures get a bounded retry.
+                if attempt < 2 and err.code in (429, 500, 502, 503, 504):
+                    print(f"[{index}/{len(selected)}] HTTP {err.code}; retrying...", flush=True)
+                    time.sleep(3 * (attempt + 1))
+                    continue
+                failures += 1
+                print(f"[{index}/{len(selected)}] FAILED {item['id']}: HTTP {err.code}",
+                      file=sys.stderr, flush=True)
+                break
+            except urllib.error.URLError as err:
+                if attempt < 2:
+                    print(f"[{index}/{len(selected)}] Network error; retrying...", flush=True)
+                    time.sleep(3 * (attempt + 1))
+                    continue
+                failures += 1
+                print(f"[{index}/{len(selected)}] FAILED {item['id']}: {err}",
+                      file=sys.stderr, flush=True)
+                break
+            except (InstallerError, OSError, ValueError) as err:
+                failures += 1
+                print(f"[{index}/{len(selected)}] FAILED {item['id']}: {err}",
+                      file=sys.stderr, flush=True)
+                break
         if index < len(selected) and interval:
-            time.sleep(interval)  # Wallhaven documents an API request rate limit.
+            time.sleep(interval)  # Respect Wallhaven's documented API rate limit.
     return successes, failures
 
 
+
 def main() -> int:
-    parser = argparse.ArgumentParser(description="MOMO selective installer (no sudo or automatic packages)")
-    parser.add_argument("--check", action="store_true", help="validate project files and wallpaper manifest without changing anything")
-    parser.add_argument("--dry-run", action="store_true", help="choose options, then display the plan without changing anything")
+    parser = argparse.ArgumentParser(description="MOMO selective installer (Gum UI, no sudo or package installation)")
+    parser.add_argument("--check", action="store_true", help="validate project files without changing anything")
+    parser.add_argument("--dry-run", action="store_true", help="show selection and file plan without writing or downloading")
+    parser.add_argument("--doctor", action="store_true", help="report which application commands are installed")
+    parser.add_argument("--restore", action="store_true", help="interactively restore a previous MOMO session")
     args = parser.parse_args()
     try:
         catalog = check_tree()
         if args.check:
             print(f"OK: {len(COMPONENTS)} components and {len(catalog)} wallpaper references")
             return 0
+        if args.doctor:
+            print("MOMO application readiness (not a guarantee of runtime compatibility):")
+            for command, installed in component_requirements(list(COMPONENTS)):
+                print(f"  {'OK' if installed else 'MISSING':<8} {command}")
+            print_preflight(["hyprland", "waybar"])
+            return 0
         if os.geteuid() == 0:
             raise InstallerError("Do not run MOMO with sudo or as root")
-        if shutil.which("dialog") is None:
-            raise InstallerError("Install the official Arch package first: sudo pacman -S --needed dialog")
+        if shutil.which("gum") is None:
+            raise InstallerError("Install official Arch package first: sudo pacman -S --needed gum")
+        if args.restore:
+            sessions = list_sessions(Path.home())
+            if not sessions:
+                raise InstallerError("No MOMO backup sessions available")
+            show_heading("RESTORE", "Restore earlier settings, preserving current files")
+            chosen = gum_choose("Choose backup session", [(p.name, p.name) for p in sessions], height=10)
+            if chosen is None:
+                print("Cancelled. No files changed.")
+                return 0
+            session = next(p for p in sessions if p.name == chosen[0])
+            changes = read_session(session, Path.home())
+            print("Restore plan:")
+            for relative, was_present in changes:
+                print(f"  {'RESTORE' if was_present else 'REMOVE':<9} {relative}")
+            print("Current versions will be preserved in a new private backup.")
+            if not gum_confirm("Restore selected backup?"):
+                print("Cancelled. No files changed.")
+                return 0
+            restore_session(session, Path.home())
+            return 0
+
         selected = select_options(catalog)
         if selected is None:
             print("Cancelled. No files changed.")
             return 0
         components, wallpaper_items = selected
-        desc = "\\ZbSelected configuration groups:\\Zn\n" + ", ".join(components or ["none"])
-        desc += f"\n\nWallpapers to download: {len(wallpaper_items)}"
-        desc += "\nDestination: ~/Pictures (compatible with supplied Waypaper settings)"
-        desc += "\n\nExisting selected configs are moved into a private timestamped backup."
-        desc += "\nNo system-wide files or packages will be changed. Continue?"
-        if run_dialog("--title", "Confirm changes", "--defaultno", "--yesno", desc, "17", "84") is None:
-            print("Cancelled. No files changed.")
-            return 0
+        print_plan(components, wallpaper_items, Path.home())
         if args.dry_run:
             print("DRY RUN: no files changed, no network requests made.")
-            print("Components:", ", ".join(components or ["none"]))
-            print("Wallpapers:", ", ".join(w["id"] for w in wallpaper_items) or "none")
+            return 0
+        if not gum_confirm("Install selected MOMO components and wallpapers?"):
+            print("Cancelled. No files changed.")
             return 0
         backup = install_components(components, Path.home())
         ok, failed = download_wallpapers(wallpaper_items, Path.home())

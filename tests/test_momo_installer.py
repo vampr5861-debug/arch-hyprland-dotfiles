@@ -169,24 +169,120 @@ class DownloadTests(unittest.TestCase):
             self.assertEqual(dst.read_bytes(), b"original")
 
 
-class DialogTests(unittest.TestCase):
-    def test_dialog_uses_repo_theme_without_global_environment_mutation(self):
+class GumTests(unittest.TestCase):
+    def test_choose_uses_label_delimiter_and_scoped_colors(self):
         class Result:
             returncode = 0
-            stdout = "hyprland\n"
+            stdout = "hyprland\nkitty\n"
         with mock.patch.object(momo.subprocess, "run", return_value=Result()) as call:
-            self.assertEqual(momo.run_dialog("--checklist", "test", "0", "0", "0"), "hyprland")
+            selected = momo.gum_choose("Components", [("hyprland", "Hyprland"), ("kitty", "Kitty")], multiple=True)
+        self.assertEqual(selected, ["hyprland", "kitty"])
         args, kwargs = call.call_args
-        self.assertIn("--no-shadow", args[0])
-        self.assertEqual(kwargs["env"]["DIALOGRC"], str(momo.DIALOG_THEME))
-        self.assertNotIn("DIALOGRC", os.environ)
+        self.assertEqual(args[0][:2], ["gum", "choose"])
+        self.assertIn("--no-limit", args[0])
+        self.assertIn("--label-delimiter", args[0])
+        self.assertIn("Hyprland::hyprland", args[0])
+        self.assertIn("GUM_CHOOSE_CURSOR_FOREGROUND", kwargs["env"])
+        self.assertNotIn("GUM_CHOOSE_CURSOR_FOREGROUND", os.environ)
 
-    def test_dialog_error_is_not_confused_with_cancel(self):
-        with mock.patch.object(momo.subprocess, "run") as call:
-            call.return_value.returncode = 2
-            call.return_value.stdout = ""
-            with self.assertRaisesRegex(momo.InstallerError, "dialog failed"):
-                momo.run_dialog("--msgbox", "test", "0", "0")
+    def test_unknown_menu_choice_is_rejected(self):
+        with mock.patch.object(momo, "run_gum", return_value=mock.Mock(returncode=0, stdout="evil\n")):
+            with self.assertRaisesRegex(momo.InstallerError, "Unexpected selection"):
+                momo.gum_choose("Items", [("hyprland", "Hyprland")])
+
+    def test_gum_cancel_not_an_error(self):
+        with mock.patch.object(momo, "run_gum", return_value=mock.Mock(returncode=1, stdout="")):
+            self.assertIsNone(momo.gum_choose("Items", [("a", "A")]))
+            self.assertFalse(momo.gum_confirm("Go?"))
+
+    def test_confirm_defaults_to_no(self):
+        with mock.patch.object(momo, "run_gum", return_value=mock.Mock(returncode=0)) as call:
+            self.assertTrue(momo.gum_confirm("Go?"))
+            self.assertIn("--default=false", call.call_args.args)
+
+    def test_custom_profile_and_wallpaper_choice(self):
+        catalog = momo.load_catalog()
+        answers = iter([["custom"], ["kitty", "fish"], ["choose"], [catalog[0]["id"]]])
+        with mock.patch.object(momo, "show_heading"), mock.patch.object(momo, "gum_choose", side_effect=lambda *a, **k: next(answers)):
+            keys, walls = momo.select_options(catalog)
+        self.assertEqual(keys, ["kitty", "fish"])
+        self.assertEqual(walls, [catalog[0]])
+
+    def test_complete_profile_selects_all_groups(self):
+        catalog = momo.load_catalog()
+        answers = iter([["complete"], ["skip"]])
+        with mock.patch.object(momo, "show_heading"), mock.patch.object(momo, "gum_choose", side_effect=lambda *a, **k: next(answers)):
+            keys, walls = momo.select_options(catalog)
+        self.assertEqual(keys, list(momo.COMPONENTS))
+        self.assertFalse(walls)
+
+
+class PlanAndRestoreTests(unittest.TestCase):
+    def setUp(self):
+        self.tmp = tempfile.TemporaryDirectory()
+        self.addCleanup(self.tmp.cleanup)
+        self.base = Path(self.tmp.name)
+        self.home = self.base / "home"
+        self.repo = self.base / "repo"
+        self.home.mkdir()
+        (self.repo / "home/.config/hypr").mkdir(parents=True)
+        (self.repo / "home/.config/hypr/hyprland.lua").write_text("new\n")
+        (self.repo / "home/.config/kitty").mkdir(parents=True)
+        (self.repo / "home/.config/kitty/kitty.conf").write_text("new kitty\n")
+        (self.home / ".config/hypr").mkdir(parents=True)
+        (self.home / ".config/hypr/hyprland.lua").write_text("old\n")
+        self.state = self.base / "state"
+        self.patch_env = mock.patch.dict(os.environ, {"XDG_STATE_HOME": str(self.state)})
+        self.patch_env.start()
+        self.addCleanup(self.patch_env.stop)
+
+    def test_plan_add_replace_unchanged(self):
+        plan = momo.build_plan(["hyprland", "kitty"], self.home, self.repo)
+        self.assertEqual(plan, [(".config/hypr", "REPLACE"), (".config/kitty", "ADD")])
+        backup = momo.install_components(["hyprland", "kitty"], self.home, self.repo)
+        self.assertTrue(backup.is_dir())
+        self.assertEqual(momo.build_plan(["hyprland", "kitty"], self.home, self.repo),
+                         [(".config/hypr", "UNCHANGED"), (".config/kitty", "UNCHANGED")])
+
+    def test_repeat_install_noop_preserves_only_backup(self):
+        first = momo.install_components(["hyprland"], self.home, self.repo)
+        self.assertIsNone(momo.install_components(["hyprland"], self.home, self.repo))
+        self.assertEqual(momo.list_sessions(self.home), [first])
+
+    def test_restore_retains_original_backup_and_pre_restore_current(self):
+        saved = momo.install_components(["hyprland", "kitty"], self.home, self.repo)
+        restore = momo.restore_session(saved, self.home)
+        self.assertEqual((self.home / ".config/hypr/hyprland.lua").read_text(), "old\n")
+        self.assertFalse((self.home / ".config/kitty").exists())
+        self.assertEqual((saved / ".config/hypr/hyprland.lua").read_text(), "old\n")
+        self.assertEqual((restore / ".config/hypr/hyprland.lua").read_text(), "new\n")
+        self.assertEqual((restore / ".config/kitty/kitty.conf").read_text(), "new kitty\n")
+
+    def test_malicious_record_cannot_escape_home(self):
+        bad = self.state / "momo/backups/session-malicious"
+        bad.mkdir(parents=True)
+        (bad / "install-record.json").write_text(json.dumps({"version": 1, "files": [
+            {"destination": "../../.ssh", "previous_version": False}]}))
+        with self.assertRaisesRegex(momo.InstallerError, "Invalid backup"):
+            momo.read_session(bad, self.home)
+
+    def test_restore_rejects_symlinked_parent_without_mutation(self):
+        saved = momo.install_components(["hyprland", "kitty"], self.home, self.repo)
+        (self.home / ".config/kitty").rename(self.base / "moved")
+        (self.home / ".config").rename(self.base / "config-saved")
+        (self.home / ".config").symlink_to(self.base / "config-saved")
+        with self.assertRaisesRegex(momo.InstallerError, "symlinked"):
+            momo.restore_session(saved, self.home)
+
+    def test_source_link_outside_component_rejected_before_plan(self):
+        (self.repo / "home/.config/hypr/escape").symlink_to("/etc/passwd")
+        with self.assertRaisesRegex(momo.InstallerError, "escaping symlink"):
+            momo.build_plan(["hyprland"], self.home, self.repo)
+
+    def test_missing_app_is_informational_only(self):
+        with mock.patch.object(momo.shutil, "which", return_value=None):
+            report = momo.component_requirements(["fish", "kitty"])
+        self.assertEqual(report, [("fish", False), ("starship", False), ("kitty", False)])
 
 
 class ApiSecurityTests(unittest.TestCase):
@@ -228,3 +324,96 @@ class ApiSecurityTests(unittest.TestCase):
 
 if __name__ == "__main__":
     unittest.main()
+
+class ExtraRegressionTests(unittest.TestCase):
+    def test_temporary_http_503_retried(self):
+        item = {"id": "abc123", "filename": "wallhaven-abc123.jpg"}
+        with tempfile.TemporaryDirectory() as temp:
+            with mock.patch.object(momo, "download_one", side_effect=[
+                momo.urllib.error.HTTPError("https://wallhaven.cc", 503, "Unavailable", {}, None),
+                "Downloaded: wallhaven-abc123.jpg"] ) as f:
+                with mock.patch.object(momo.time, "sleep") as sleeper:
+                    self.assertEqual(momo.download_wallpapers([item], Path(temp), interval=0), (1, 0))
+                    self.assertEqual(f.call_count, 2)
+                    sleeper.assert_called_once()
+
+    def test_http_404_not_retried(self):
+        item = {"id": "abc123", "filename": "wallhaven-abc123.jpg"}
+        with tempfile.TemporaryDirectory() as temp:
+            with mock.patch.object(momo, "download_one", side_effect=momo.urllib.error.HTTPError(
+                    "https://wallhaven.cc", 404, "Not Found", {}, None)) as f:
+                self.assertEqual(momo.download_wallpapers([item], Path(temp), interval=0), (0, 1))
+                f.assert_called_once()
+
+    def test_dry_run_never_mutates_or_downloads(self):
+        with mock.patch.object(momo, "check_tree", return_value=[]), \
+             mock.patch.object(momo.os, "geteuid", return_value=1000), \
+             mock.patch.object(momo.shutil, "which", return_value="/usr/bin/gum"), \
+             mock.patch.object(momo, "select_options", return_value=(["hyprland"], [])), \
+             mock.patch.object(momo, "print_plan") as print_plan, \
+             mock.patch.object(momo, "install_components") as install, \
+             mock.patch.object(momo, "download_wallpapers") as download, \
+             mock.patch.object(momo.sys, "argv", ["install.sh", "--dry-run"]):
+            self.assertEqual(momo.main(), 0)
+            print_plan.assert_called_once()
+            install.assert_not_called()
+            download.assert_not_called()
+
+    def test_cancel_on_confirm_never_mutates(self):
+        with mock.patch.object(momo, "check_tree", return_value=[]), \
+             mock.patch.object(momo.os, "geteuid", return_value=1000), \
+             mock.patch.object(momo.shutil, "which", return_value="/usr/bin/gum"), \
+             mock.patch.object(momo, "select_options", return_value=(["hyprland"], [])), \
+             mock.patch.object(momo, "print_plan"), \
+             mock.patch.object(momo, "gum_confirm", return_value=False), \
+             mock.patch.object(momo, "install_components") as install, \
+             mock.patch.object(momo, "download_wallpapers") as download, \
+             mock.patch.object(momo.sys, "argv", ["install.sh"]):
+            self.assertEqual(momo.main(), 0)
+            install.assert_not_called()
+            download.assert_not_called()
+
+class TransactionFailureTests(unittest.TestCase):
+    def setUp(self):
+        self.tmp = tempfile.TemporaryDirectory()
+        self.addCleanup(self.tmp.cleanup)
+        base = Path(self.tmp.name)
+        self.home = base / "home"
+        self.repo = base / "repo"
+        self.home.mkdir()
+        for key, filename in (("hypr", "hyprland.lua"), ("kitty", "kitty.conf")):
+            origin = self.repo / "home/.config" / key
+            target = self.home / ".config" / key
+            origin.mkdir(parents=True)
+            target.mkdir(parents=True)
+            (origin / filename).write_text(f"new {key}")
+            (target / filename).write_text(f"old {key}")
+        patcher = mock.patch.dict(os.environ, {"XDG_STATE_HOME": str(base / "state")})
+        patcher.start()
+        self.addCleanup(patcher.stop)
+
+    def test_install_failure_mid_transaction_restores_both_old_versions(self):
+        original = Path.rename
+        def failing_rename(obj, dst):
+            if "momo-stage-" in str(obj) and str(obj).endswith("/.config/kitty"):
+                raise OSError("simulated write failure")
+            return original(obj, dst)
+        with mock.patch.object(Path, "rename", failing_rename):
+            with self.assertRaisesRegex(OSError, "simulated"):
+                momo.install_components(["hyprland", "kitty"], self.home, self.repo)
+        self.assertEqual((self.home / ".config/hypr/hyprland.lua").read_text(), "old hypr")
+        self.assertEqual((self.home / ".config/kitty/kitty.conf").read_text(), "old kitty")
+
+    def test_restore_failure_mid_transaction_recovers_current_versions(self):
+        saved = momo.install_components(["hyprland", "kitty"], self.home, self.repo)
+        original = Path.rename
+        def failing_rename(obj, dst):
+            if "momo-restore-stage-" in str(obj) and str(obj).endswith("/.config/kitty"):
+                raise OSError("simulated restore failure")
+            return original(obj, dst)
+        with mock.patch.object(Path, "rename", failing_rename):
+            with self.assertRaisesRegex(OSError, "simulated restore failure"):
+                momo.restore_session(saved, self.home)
+        self.assertEqual((self.home / ".config/hypr/hyprland.lua").read_text(), "new hypr")
+        self.assertEqual((self.home / ".config/kitty/kitty.conf").read_text(), "new kitty")
+        self.assertEqual((saved / ".config/hypr/hyprland.lua").read_text(), "old hypr")
