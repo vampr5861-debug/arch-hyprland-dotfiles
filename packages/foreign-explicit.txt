@@ -1,0 +1,11 @@
+cmatrix-git
+helium-browser-bin
+hoptodesk
+lavat
+mpvpaper
+throne
+tty-clock
+waypaper
+wlogout
+yay
+yay-debug

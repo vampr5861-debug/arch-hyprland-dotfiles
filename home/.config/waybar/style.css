@@ -1,0 +1,169 @@
+/* Waybar · clean native modules · graphite. No custom widget scripts. */
+* {
+    font-family: "JetBrainsMono Nerd Font", "JetBrains Mono", monospace;
+    min-height: 0;
+    border: none;
+    border-radius: 0;
+    box-shadow: none;
+    text-shadow: none;
+}
+window#waybar,
+window#waybar > box {
+    background: #07090c;
+    background-image: none;
+    color: #dae2ec;
+    border: none;
+    border-radius: 0;
+    box-shadow: none;
+}
+window#waybar > box {
+    padding-left: 4px;
+    padding-right: 4px;
+}
+/* Text sizes are assigned to individual modules below.
+   Do not style all Waybar labels: that also affects tray menus. */
+/* Six native Hyprland workspace buttons: 1 2 3 4 5 6 */
+#workspaces {
+    background: transparent;
+    margin: 2px 0;
+    padding: 0;
+}
+#workspaces button {
+    color: #b8c3d0;
+    font-size: 19px;
+    font-weight: 700;
+    background: transparent;
+    border: none;
+    border-radius: 0;
+    box-shadow: none;
+    text-shadow: none;
+    min-width: 10px;
+    min-height: 0;
+    margin: 0 1px;
+    padding: 0 8px;
+}
+/* Workspace numbers are GTK label children of the buttons. */
+#workspaces button label {
+    font-size: 19px;
+}
+#workspaces button.active {
+    color: #f9fbff;
+    font-weight: 800;
+    background: transparent;
+}
+#workspaces button:hover {
+    color: #edf2f8;
+    background: transparent;
+    border: none;
+    box-shadow: none;
+    text-shadow: none;
+}
+/* Temperature readings and system usage */
+#temperature.cpu, #custom-gpu-temp, #cpu, #memory {
+    color: #dee6ef;
+    font-size: 19px;
+    font-weight: 700;
+    background: transparent;
+    margin: 2px 1px;
+    padding: 0 10px;
+}
+#temperature.cpu:hover, #custom-gpu-temp:hover,
+#cpu:hover, #memory:hover {
+    color: #ffffff;
+    background: transparent;
+}
+/* Status area: compact right group, tray first, then native network */
+#tray {
+    margin: 2px 0;
+    padding: 0 5px;
+    background: transparent;
+}
+#tray > .passive, #tray > .active, #tray > .needs-attention {
+    padding-left: 2px;
+    padding-right: 2px;
+}
+#network, #pulseaudio, #pulseaudio.mic, #bluetooth, #language {
+    color: #d6dfe9;
+    font-weight: 700;
+    font-size: 19px;
+    padding: 0 6px;
+    margin: 2px 0;
+    background: transparent;
+}
+/* Compact only the native network readout; other status icons retain their size. */
+#network {
+    font-size: 16px;
+    padding: 0 3px;
+}
+#network.disconnected, #network.disabled { color: #aeb9c6; }
+#bluetooth.off, #bluetooth.disabled, #bluetooth.no-controller { color: #aeb9c6; }
+#pulseaudio.mic.source-muted { color: #db8996; }
+#network:hover, #pulseaudio:hover, #pulseaudio.mic:hover, #bluetooth:hover, #language:hover {
+    color: #ffffff;
+    background: transparent;
+}
+#clock {
+    color: #f4f7fb;
+    font-weight: 700;
+    font-size: 19px;
+    padding: 0 7px;
+    margin: 2px 0;
+    background: transparent;
+}
+#clock:hover { color: #ffffff; background: transparent; }
+/* Left Arch button and right power button */
+window#waybar #custom-arch {
+    font-family: "JetBrainsMono Nerd Font", "JetBrains Mono", monospace;
+    font-size: 24px;
+    font-weight: 400;
+    color: #f8fafc;
+    background: transparent;
+    margin: 2px 0;
+    padding: 0 12px;
+}
+#custom-power {
+    color: #f16a6a;
+    font-size: 20px;
+    font-weight: 400;
+    margin: 2px 0;
+    padding: 0 9px;
+    background: transparent;
+}
+#custom-power:hover { color: #ffffff; background: transparent; }
+tooltip {
+    background: #202020;
+    color: #f3f6fc;
+    border: 1px solid #5a5a5a;
+    border-radius: 0;
+}
+tooltip label { color: #f3f6fc; }
+/* Native GTK menu opened by Waybar's custom/arch module. */
+/* Native GTK menus, including right-click menus from tray applications. */
+menu {
+    background: #101314;
+    color: #e6eaed;
+    border: 1px solid #383e42;
+    border-radius: 9px;
+    padding: 3px;
+    font-size: 13px;
+}
+menu menuitem {
+    background: transparent;
+    color: #dce2e5;
+    border-radius: 4px;
+    min-height: 0;
+    padding: 3px 8px;
+    font-size: 13px;
+}
+menu menuitem label {
+    font-family: "JetBrainsMono Nerd Font", "JetBrains Mono", monospace;
+    font-size: 13px;
+    font-weight: 400;
+}
+menu menuitem:hover {
+    background: #292f32;
+    color: #ffffff;
+}
+menu menuitem:hover label {
+    color: #ffffff;
+}

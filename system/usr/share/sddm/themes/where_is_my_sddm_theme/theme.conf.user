@@ -1,0 +1,15 @@
+[General]
+passwordInputRadius=10
+passwordInputWidth=0.25
+showUsersByDefault=true
+showUserRealNameByDefault=false
+showSessionsByDefault=true
+backgroundFill=#000000
+font=monospace
+hideCursor=true
+passwordFontSize=24
+usersFontSize=14
+sessionsFontSize=12
+helpFontSize=11
+passwordInputCursorVisible=false
+cursorBlinkAnimation=false

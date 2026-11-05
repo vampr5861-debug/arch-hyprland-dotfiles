@@ -1,0 +1,116 @@
+
+/* MomoGray · Waypaper · GTK3 */
+/* Neutral dark surface, cool grey accents, tight controls. */
+
+* {
+    font-family: "JetBrainsMono Nerd Font", "JetBrains Mono", sans-serif;
+    font-size: 12px;
+}
+
+window {
+    background-color: #0b0d10;
+    color: #e1e6ed;
+}
+
+button {
+    background-image: none;
+    background-color: #181d24;
+    color: #d8dfe8;
+    border: 1px solid #303943;
+    border-radius: 9px;
+    box-shadow: none;
+    text-shadow: none;
+    padding: 4px 8px;
+    min-height: 24px;
+}
+
+button:hover {
+    background-image: none;
+    background-color: #26303b;
+    border-color: #657687;
+    box-shadow: none;
+}
+
+button:active, button:checked {
+    background-color: #323d49;
+    border-color: #9eabb9;
+}
+
+button:focus {
+    border-color: #9eabb9;
+}
+
+button:hover > image {
+    -gtk-icon-shadow: none;
+}
+
+entry, searchentry {
+    background-image: none;
+    background-color: #151a20;
+    color: #e1e6ed;
+    caret-color: #e1e6ed;
+    border: 1px solid #303943;
+    border-radius: 8px;
+    box-shadow: none;
+    padding: 5px 9px;
+    min-height: 23px;
+}
+
+entry:focus, searchentry:focus {
+    border-color: #9eabb9;
+    box-shadow: none;
+}
+
+/* Waypaper gallery: Gtk.Grid contains Gtk.Button thumbnail widgets. */
+/* Native previews are 240 px wide, with height determined by aspect ratio. */
+scrolledwindow, viewport, grid {
+    background-color: transparent;
+}
+
+/* Remove the GTK3 overscroll marks above and below the gallery. */
+scrolledwindow undershoot.top,
+scrolledwindow undershoot.bottom {
+    background-image: none;
+}
+
+/* Borderless thumbnails with a small, consistent gap (2 px on each side). */
+grid button,
+grid button:hover,
+grid button:active,
+grid button:checked,
+grid button:focus,
+grid button.highlighted-button,
+grid button.highlighted-button:hover {
+    background-image: none;
+    background-color: transparent;
+    border: none;
+    border-radius: 0;
+    outline: none;
+    box-shadow: none;
+    text-shadow: none;
+    padding: 0;
+    margin: 2px;
+    min-width: 0;
+    min-height: 0;
+}
+
+/* Preserve subtle selection feedback without a border. */
+grid button.highlighted-button > image {
+    -gtk-icon-effect: highlight;
+}
+
+scrollbar {
+    background-color: transparent;
+}
+
+scrollbar slider {
+    background-color: #46515d;
+    border: none;
+    border-radius: 8px;
+    min-width: 5px;
+    min-height: 5px;
+}
+
+scrollbar slider:hover {
+    background-color: #738090;
+}

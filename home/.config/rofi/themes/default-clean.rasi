@@ -1,0 +1,77 @@
+/* Default Clean Rounded: five app results, no icons, no tabs, no transparency. */
+configuration {
+    show-icons: false;
+    font: "JetBrainsMono Nerd Font 11";
+}
+
+* {
+    background: #171a1c;
+    foreground: #e2e6e8;
+    input-background: #24292c;
+    selection: #343a3e;
+    outline: #41484c;
+    background-color: transparent;
+    text-color: @foreground;
+}
+
+window {
+    width: 350px;
+    location: center;
+    anchor: center;
+    border: 1px;
+    border-color: @outline;
+    border-radius: 9px;
+    padding: 10px;
+    background-color: @background;
+}
+
+mainbox {
+    children: [ inputbar, listview ];
+    spacing: 7px;
+    background-color: transparent;
+}
+
+inputbar {
+    children: [ entry ];
+    background-color: @input-background;
+    padding: 9px 11px;
+    border: 0px;
+    border-radius: 5px;
+}
+
+entry {
+    placeholder: "Search...";
+    placeholder-color: #969ea2;
+    background-color: transparent;
+    text-color: @foreground;
+}
+
+listview {
+    lines: 5;
+    columns: 1;
+    fixed-height: true;
+    scrollbar: false;
+    cycle: false;
+    spacing: 2px;
+    background-color: transparent;
+}
+
+element {
+    children: [ element-text ];
+    padding: 7px 11px;
+    border: 0px;
+    border-radius: 5px;
+    background-color: transparent;
+}
+
+element-text {
+    background-color: transparent;
+    text-color: @foreground;
+}
+
+element selected.normal,
+element selected.active,
+element selected.urgent {
+    background-color: @selection;
+    text-color: @foreground;
+}

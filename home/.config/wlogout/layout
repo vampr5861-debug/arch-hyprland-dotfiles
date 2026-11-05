@@ -1,0 +1,4 @@
+{"label":"shutdown","action":"systemctl poweroff","text":"OFF","keybind":"s","height":0.5,"width":0.5}
+{"label":"reboot","action":"systemctl reboot","text":"REBOOT","keybind":"r","height":0.5,"width":0.5}
+{"label":"logout","action":"hyprctl dispatch 'hl.dsp.exit()'","text":"LOGOUT","keybind":"e","height":0.5,"width":0.5}
+{"label":"lock","action":"hyprlock","text":"LOCK","keybind":"l","height":0.5,"width":0.5}

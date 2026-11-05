@@ -1,0 +1,16 @@
+# Fish prompt — screenshot style: ~ ❯
+# Uses the existing "starship init fish | source" in fish/config.fish.
+add_newline = false
+format = '$directory$character'
+
+[directory]
+format = '[$path]($style) '
+style = 'fg:#B8BEC7'
+truncation_length = 3
+truncate_to_repo = false
+home_symbol = '~'
+
+[character]
+success_symbol = '[❯](fg:#E5E7EB)'
+error_symbol = '[❯](fg:#E5E7EB)'
+vimcmd_symbol = '[❮](fg:#E5E7EB)'

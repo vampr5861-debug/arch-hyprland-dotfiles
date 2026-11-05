@@ -1,0 +1,150 @@
+{
+  "layer": "top",
+  "position": "top",
+  "height": 48,
+  "margin-top": 4,
+  "margin-left": 6,
+  "margin-right": 6,
+  "spacing": 3,
+  "modules-left": [
+    "custom/arch",
+    "ext/workspaces"
+  ],
+  "modules-center": [
+    "temperature#cpu",
+    "custom/gpu-temp",
+    "cpu",
+    "memory"
+  ],
+  "modules-right": [
+    "tray",
+    "network",
+    "pulseaudio",
+    "pulseaudio#mic",
+    "bluetooth",
+    "hyprland/language",
+    "clock",
+    "custom/power"
+  ],
+  "custom/arch": {
+    "format": "",
+    "tooltip": false,
+    "on-click": "rofi -no-config -show drun -theme $HOME/.config/rofi/launchers/type-4/style-8.rasi"
+  },
+  "ext/workspaces": {
+    "format": "{name}",
+    "sort-by-id": true,
+    "on-click": "activate",
+    "on-scroll-up": "hyprctl dispatch 'hl.dsp.focus({ workspace = \"e-1\" })'",
+    "on-scroll-down": "hyprctl dispatch 'hl.dsp.focus({ workspace = \"e+1\" })'"
+  },
+  "temperature#cpu": {
+    "hwmon-name": "coretemp",
+    "input-filename": "temp1_input",
+    "interval": 5,
+    "format": " {temperatureC}°",
+    "tooltip-format": "CPU: {temperatureC}°C",
+    "on-click": "kitty -e btop"
+  },
+  "custom/gpu-temp": {
+    "exec": "nvidia-smi --query-gpu=temperature.gpu --format=csv,noheader,nounits",
+    "interval": 10,
+    "format": "󰢮 {}°",
+    "tooltip": false,
+    "on-click": "kitty -e btop"
+  },
+  "cpu": {
+    "interval": 3,
+    "format": " {usage}%",
+    "on-click": "kitty -e btop",
+    "tooltip-format": "CPU usage: {usage}%"
+  },
+  "memory": {
+    "interval": 5,
+    "format": " {used:0.1f}G",
+    "on-click": "kitty -e btop",
+    "tooltip-format": "RAM: {used:0.1f} / {total:0.1f} GiB"
+  },
+  "network": {
+    "interval": 1,
+    "family": "ipv4",
+    "format": "{ipaddr} ↓{bandwidthDownBytes} ↑{bandwidthUpBytes}",
+    "format-ethernet": "{ipaddr} ↓{bandwidthDownBytes} ↑{bandwidthUpBytes}",
+    "format-wifi": "{ipaddr} ↓{bandwidthDownBytes} ↑{bandwidthUpBytes}",
+    "format-linked": "NET: no IPv4",
+    "format-disconnected": "NET: offline",
+    "format-disabled": "NET: disabled",
+    "tooltip-format": "Interface: {ifname}\nIPv4: {ipaddr}\nGateway: {gwaddr}",
+    "tooltip-format-ethernet": "Ethernet: {ifname}\nIPv4: {ipaddr}\nGateway: {gwaddr}",
+    "tooltip-format-wifi": "Wi-Fi: {essid}\nInterface: {ifname}\nIPv4: {ipaddr}\nGateway: {gwaddr}",
+    "tooltip-format-disconnected": "No active network connection"
+  },
+  "tray": {
+    "spacing": 6,
+    "icon-size": 21
+  },
+  "pulseaudio": {
+    "format": "{icon} {volume}%",
+    "format-muted": "󰝟 mute",
+    "format-icons": {
+      "default": [
+        "",
+        "",
+        ""
+      ]
+    },
+    "scroll-step": 2,
+    "on-click-right": "wpctl set-mute @DEFAULT_AUDIO_SINK@ toggle",
+    "tooltip-format": "{desc} • {volume}%\nWheel: 2% • Left click: mixer • Right click: mute • Middle click: mixer",
+    "on-click-middle": "pavucontrol",
+    "on-click": "pavucontrol"
+  },
+  "pulseaudio#mic": {
+    "target": "source",
+    "format": "{format_source}",
+    "format-source": "",
+    "format-source-muted": "󰍭",
+    "tooltip-format": "{source_desc} • {source_volume}%",
+    "on-click": "pactl set-source-mute @DEFAULT_SOURCE@ toggle"
+  },
+  "bluetooth": {
+    "format": "",
+    "format-on": "",
+    "format-connected": "",
+    "format-off": "󰂲",
+    "format-disabled": "󰂲",
+    "format-no-controller": "󰂲",
+    "tooltip-format": "Bluetooth: {status}",
+    "tooltip-format-connected": "Bluetooth: {num_connections} connected\n{device_enumerate}",
+    "tooltip-format-enumerate-connected": "{device_alias}",
+    "on-click": "blueman-manager"
+  },
+  "hyprland/language": {
+    "format": "{}",
+    "format-en": "US",
+    "format-ru": "RU",
+    "on-click": "hyprctl switchxkblayout current next",
+    "tooltip": false
+  },
+  "clock": {
+    "interval": 60,
+    "format": "{:%a %d %b  %I:%M %p}",
+    "tooltip-format": "<tt><span size=\"12pt\">{calendar}</span></tt>",
+    "tooltip": true,
+    "calendar": {
+      "mode": "month",
+      "weeks-pos": "",
+      "format": {
+        "months": "<span color=\"#e0e0e0\"><b>{}</b></span>",
+        "weekdays": "<span color=\"#aaaaaa\"><b>{}</b></span>",
+        "today": "<span color=\"#ffffff\" background=\"#444444\"><b>{}</b></span>"
+      }
+    }
+  },
+  "custom/power": {
+    "format": "",
+    "tooltip": true,
+    "tooltip-format": "Lock • Log out • Reboot • Shut down",
+    "on-click": "wlogout -b 4 -c 0 -L 1055 -R 1055 -T 664 -B 664 -p layer-shell"
+  }
+}

@@ -1,0 +1,76 @@
+/* wlogout — Ultra Minimal / flat monochrome
+   Four compact text-only buttons, no gradients, shadows, highlights, or CSS blur.
+   Designed to work with the existing launch command and its margins.
+   GTK CSS only; no scripts or changes to button actions.
+*/
+
+* {
+    font-family: "Noto Sans", "DejaVu Sans", sans-serif;
+    box-shadow: none;
+    text-shadow: none;
+}
+
+/* No dimming or fake glass overlay. Blur from Hyprland layer rules is separate. */
+window {
+    background-color: transparent;
+    background-image: none;
+}
+
+/* The existing launcher reserves ~450x112 px at 2560x1440.
+   Margins reduce the visible panel to ~322x80 px without changing bindings. */
+grid {
+    background-color: #111112;
+    background-image: none;
+    border: 1px solid #252526;
+    border-radius: 8px;
+    box-shadow: none;
+    margin: 16px 64px;
+    padding: 3px;
+}
+
+button {
+    color: #eeeeee;
+    background-color: transparent;
+    background-image: none;
+    border: none;
+    border-radius: 5px;
+    outline-style: none;
+    box-shadow: none;
+    text-shadow: none;
+    margin: 0;
+    padding: 0;
+    min-width: 66px;
+    min-height: 62px;
+    font-size: 11px;
+    font-weight: 600;
+    letter-spacing: 0.15px;
+}
+
+button:hover {
+    background-color: #242426;
+}
+
+/* Keyboard focus: flat, high-contrast highlight for arrow/Tab navigation. */
+button:focus {
+    background-color: #303034;
+    outline-style: solid;
+    outline-width: 1px;
+    outline-color: #919198;
+    outline-offset: -2px;
+}
+
+button:focus:hover {
+    background-color: #303034;
+}
+
+button:active {
+    background-color: #414146;
+}
+
+/* Very faint separation, without individual raised tiles. */
+#reboot, #logout, #lock {
+    border-left: 1px solid #28282a;
+}
+
+
+/* Original PNG icons deliberately omitted: attribution/licensing unverified. */

@@ -1,0 +1,16 @@
+configuration { show-icons: false; font: "JetBrainsMono Nerd Font 11"; }
+* { bg: #0e1112; fg: #dbe0e3; selected-bg: #252a2c; outline: #303537;
+    background-color: transparent; text-color: @fg; }
+window { location: northwest; anchor: northwest; x-offset: 20px;
+    y-offset: 49px; width: 210px; border: 1px; border-color: @outline;
+    border-radius: 10px; background-color: @bg; padding: 5px; }
+mainbox { children: [ listview ]; spacing: 0px; background-color: transparent; }
+listview { lines: 6; columns: 1; fixed-height: true; dynamic: false;
+    scrollbar: false; cycle: false; spacing: 0px; padding: 0px;
+    background-color: transparent; }
+element { children: [ element-text ]; padding: 6px 10px; border: 0px;
+    border-radius: 6px; background-color: transparent; text-color: @fg; }
+element-text { vertical-align: 0.5; horizontal-align: 0.0;
+    background-color: transparent; text-color: inherit; }
+element selected.normal, element selected.active, element selected.urgent {
+    background-color: @selected-bg; text-color: #ffffff; }

@@ -1,0 +1,135 @@
+/*
+ * MOMO Rofi — Compact Minimal Dark
+ * Complete config.rasi replacement.
+ * Design: narrower window, smaller JetBrains Mono text/icons,
+ * tighter rows, subtle divider, muted selected row.
+ */
+
+configuration {
+    modi: "drun,run,window";
+    show-icons: true;
+    icon-theme: "Papirus-Dark";
+    terminal: "kitty";
+
+    display-drun: "";
+    display-run: "";
+    display-window: "";
+
+    drun-display-format: "{name}";
+
+    font: "JetBrainsMono Nerd Font 11";
+    matching: "fuzzy";
+    sort: false;
+    disable-history: false;
+    max-history-size: 50;
+    cycle: true;
+    sidebar-mode: false;
+}
+
+* {
+    bg:       #111214;
+    input-bg: #17191c;
+    selected: #22262b;
+    fg:       #e1e4e8;
+    muted:    #838991;
+    divider:  #1e2328;
+    outline:  #292d32;
+
+    background-color: transparent;
+    text-color: @fg;
+}
+
+window {
+    location: center;
+    anchor: center;
+    width: 460px;
+    padding: 0px;
+    border: 1px;
+    border-color: @outline;
+    border-radius: 10px;
+    background-color: @bg;
+}
+
+mainbox {
+    orientation: vertical;
+    spacing: 0px;
+    padding: 0px;
+    children: [ inputbar, listview ];
+    background-color: transparent;
+}
+
+inputbar {
+    expand: false;
+    orientation: horizontal;
+    children: [ entry ];
+    padding: 8px 12px;
+    spacing: 0px;
+    border: 0px 0px 1px 0px;
+    border-color: @divider;
+    background-color: @input-bg;
+}
+
+entry {
+    expand: true;
+    padding: 0px;
+    placeholder: "Search...";
+    placeholder-color: @muted;
+    text-color: @fg;
+    background-color: transparent;
+}
+
+listview {
+    lines: 10;
+    columns: 1;
+    layout: vertical;
+    spacing: 1px;
+    padding: 4px 5px;
+    border: 0px;
+    fixed-height: false;
+    dynamic: true;
+    scrollbar: false;
+    cycle: true;
+    background-color: transparent;
+}
+
+element {
+    orientation: horizontal;
+    children: [ element-icon, element-text ];
+    spacing: 8px;
+    padding: 4px 8px;
+    border: 0px;
+    border-radius: 5px;
+    background-color: transparent;
+    text-color: @fg;
+}
+
+element-icon {
+    expand: false;
+    size: 18px;
+    vertical-align: 0.5;
+    background-color: transparent;
+}
+
+element-text {
+    expand: true;
+    vertical-align: 0.5;
+    text-color: inherit;
+    background-color: transparent;
+}
+
+element normal.normal,
+element alternate.normal,
+element normal.active,
+element alternate.active,
+element normal.urgent,
+element alternate.urgent {
+    background-color: transparent;
+    text-color: @fg;
+}
+
+element selected.normal,
+element selected.active,
+element selected.urgent {
+    background-color: @selected;
+    text-color: @fg;
+}
