@@ -1,0 +1,60 @@
+name: Validate configuration
+
+on:
+  push:
+    branches: [main]
+  pull_request:
+    branches: [main]
+  workflow_dispatch:
+
+permissions:
+  contents: read
+
+jobs:
+  static-checks:
+    name: Static checks
+    runs-on: ubuntu-latest
+    steps:
+      - name: Check out repository
+        uses: actions/checkout@v4
+
+      - name: Set up Python
+        uses: actions/setup-python@v5
+        with:
+          python-version: "3.12"
+
+      - name: Validate structured configuration files
+        run: |
+          python - <<'PY'
+          import configparser
+          import json
+          import tomllib
+          from pathlib import Path
+
+          json.loads(Path("home/.config/waybar/config.jsonc").read_text())
+          tomllib.loads(Path("home/.config/starship.toml").read_text())
+
+          ini_files = (
+              "home/.config/waypaper/config.ini",
+              "home/.config/gtk-3.0/settings.ini",
+              "home/.config/gtk-4.0/settings.ini",
+              "system/usr/share/sddm/themes/where_is_my_sddm_theme/theme.conf",
+          )
+
+          for name in ini_files:
+              parser = configparser.ConfigParser()
+              with Path(name).open(encoding="utf-8") as stream:
+                  parser.read_file(stream)
+
+          print("JSON, TOML and INI files are valid.")
+          PY
+
+      - name: Validate Hyprland Lua syntax
+        run: |
+          sudo apt-get update
+          sudo apt-get install --yes lua5.4
+          luac5.4 -p home/.config/hypr/hyprland.lua
+
+      - name: Check shell script syntax
+        run: |
+          find extras -type f -name '*.sh' -print0 | xargs -0 -r -n1 bash -n
