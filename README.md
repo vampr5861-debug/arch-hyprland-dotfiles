@@ -20,14 +20,32 @@
 
 ## Preview
 
+### Desktop · Fastfetch
+
 <div align="center">
-  <a href="screenshots/waypaper-gallery.png">
-    <img src="screenshots/waypaper-gallery.png" alt="Hyprland desktop — Waypaper wallpaper gallery and Waybar" width="950">
+  <a href="screenshots/desktop-fastfetch.png">
+    <img src="screenshots/desktop-fastfetch.png" alt="Arch Linux Hyprland desktop with Waybar, Kitty and Fastfetch" width="950">
   </a>
-  <p><sub>Hyprland + Waybar + Waypaper. Нажми на изображение, чтобы открыть его в полном размере.</sub></p>
+  <p><sub>Arch Linux · Hyprland · Waybar · Kitty · Fastfetch</sub></p>
 </div>
 
-> Скриншот сделан на реальной системе. Сейчас в репозитории есть **один** снимок галереи Waypaper; скриншоты Rofi, Hyprlock и рабочего стола можно добавить позже. Изображения обоев, показанные в галерее, в комплект не входят.
+### Wallpaper gallery · Waypaper
+
+<div align="center">
+  <a href="screenshots/waypaper-overview.png">
+    <img src="screenshots/waypaper-overview.png" alt="Waypaper wallpaper selector on the Hyprland desktop" width="950">
+  </a>
+  <p><sub>Waypaper using the Hyprpaper backend · wallpaper selector</sub></p>
+</div>
+
+<details>
+<summary>Earlier Waypaper gallery screenshot</summary>
+
+![Previous gallery screenshot](screenshots/waypaper-gallery.png)
+
+</details>
+
+> Screenshots from the real setup. Wallpapers shown in the previews are not distributed with this repository.
 
 ## Components
 
