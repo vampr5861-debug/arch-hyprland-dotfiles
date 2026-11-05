@@ -1,0 +1,9 @@
+# Keep GitHub language statistics focused on the project's own configurations.
+# These are bundled third-party resources, not MOMO's application source code.
+home/.local/share/themes/Dracula-pink-accent/** linguist-vendored
+home/.local/share/icons/Notwaita-Black/** linguist-vendored
+system/usr/share/sddm/themes/where_is_my_sddm_theme/** linguist-vendored
+
+# Documentation assets should not influence language statistics.
+screenshots/** linguist-documentation
+LICENSES/** linguist-documentation
