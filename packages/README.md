@@ -1,26 +1,28 @@
-# Пакеты исходной системы
+# Original System Package Snapshot
 
-Списки получены **непосредственно** из переданных владельцем выводов `pacman -Qqen` и `pacman -Qqem` от 5 ноября 2026 года.
+The package lists were supplied directly from `pacman -Qqen` and `pacman -Qqem` on **November 5, 2026**.
 
-- `official-explicit.txt` — 129 явно установленных пакетов из официальных репозиториев.
-- `foreign-explicit.txt` — 11 явно установленных сторонних пакетов (категория `foreign` не равнозначна только AUR).
-- Это **снимок вручную установленных пакетов**, а не минимальные зависимости оформления и не полный список всех установленных пакетов.
-- Не устанавливайте весь снимок автоматически: он содержит посторонние приложения, утилиты, драйверы и пакеты, не относящиеся к dotfiles.
+- [official-explicit.txt](official-explicit.txt) — **129 explicitly installed packages** from official repositories.
+- [foreign-explicit.txt](foreign-explicit.txt) — **11 explicitly installed foreign packages**. The `foreign` category is not synonymous with AUR-only.
+- These lists are **snapshots of explicitly installed packages**, not the complete list of installed dependencies and not a minimal dotfiles dependency set.
+- **Do not install these entire lists blindly.** They include unrelated applications, drivers and other software.
 
-## Основные явно установленные компоненты оформления
+## Main explicitly installed desktop components
 
-Официальные: `hyprland`, `hyprlock`, `hyprpaper`, `hyprsunset`, `hyprpolkitagent`, `hyprshot`, `hyprpicker`, `waybar`, `rofi`, `swaync`, `cliphist`, `wl-clipboard`, `kitty`, `fish`, `starship`, `sddm`, `nwg-look`, `thunar`, `cava`, `btop`, `blueman`, `pavucontrol`, `pipewire`, `wireplumber`, `papirus-icon-theme`, `ttf-jetbrains-mono-nerd`, `otf-font-awesome`, `materia-gtk-theme`, `jq`.
+**Official repositories:** `hyprland`, `hyprlock`, `hyprpaper`, `hyprsunset`, `hyprpolkitagent`, `hyprshot`, `hyprpicker`, `waybar`, `rofi`, `swaync`, `cliphist`, `wl-clipboard`, `kitty`, `fish`, `starship`, `sddm`, `nwg-look`, `thunar`, `cava`, `btop`, `blueman`, `pavucontrol`, `pipewire`, `wireplumber`, `papirus-icon-theme`, `ttf-jetbrains-mono-nerd`, `otf-font-awesome`, `materia-gtk-theme` and `jq`.
 
-Сторонние: `waypaper`, `wlogout`.
+**Foreign packages:** `waypaper` and `wlogout`.
 
-Дополнительно для работы других настроек могут потребоваться зависимости, установленные **не явно**, а как зависимости других пакетов.
+Some required binaries may have been installed as transitive dependencies.
 
-## Что нужно перепроверить перед публикацией
+## Items to check when installing on another machine
 
-- `xsettingsd` имеет конфиг, но не находится среди явно установленных пакетов; проверьте, установлен ли он и нужен ли.
-- `playerctl` упоминается в `hyprland.lua`, но отсутствует в списке явно установленных пакетов; он может быть зависимостью или отсутствовать.
-- `nvidia-smi` используется модулем Waybar. `nvidia-utils` нет среди явно установленных пакетов, но он может быть установлен как зависимость.
-- Тема Rofi ссылается на `Iosevka Nerd Font`, которого нет в списке явно установленных пакетов (в отличие от `ttf-jetbrains-mono-nerd`).
-- Используемый курсор `Notwaita-Black` и каталог `Dracula-pink-accent` не входят в списки как отдельные пакеты — их происхождение и лицензию нужно проверить.
-- Из сторонних пакетов `mpvpaper` установлен, но не требуется для текущего `Waypaper` с backend `hyprpaper`.
-- `yay-debug` — пакет из списка сторонних пакетов и **не является обязательной зависимостью оформления**.
+- A configuration for `xsettingsd` is included, but the package is not in the explicitly installed snapshots; verify availability and whether it is needed.
+- `hyprland.lua` references `playerctl`, which is not in the explicit package list; it may be installed as a dependency or absent.
+- Waybar invokes `nvidia-smi`. `nvidia-utils` is not explicitly listed, although it may be installed as a dependency.
+- The Rofi theme refers to **Iosevka Nerd Font**, which is not explicitly listed; `ttf-jetbrains-mono-nerd` is.
+- `Notwaita-Black` and `Dracula-pink-accent` are included as local resources, not individually installed packages in the snapshot. Refer to their upstream attribution and licenses.
+- `mpvpaper` is present as a foreign package, but the published Waypaper configuration uses the **Hyprpaper** backend.
+- `yay-debug` is present in the snapshot but **is not a required desktop component**.
+
+See the main [README](../README.md) for the selective installation instructions.
