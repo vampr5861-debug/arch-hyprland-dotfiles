@@ -46,3 +46,10 @@ If Git reports an unknown author identity, configure the repository-local author
 - The published configuration has not been tested on every system; avoid promising universal one-command installation.
 
 The repository is a **manual, reproducible reference**, not a turnkey installer.
+
+
+## Automated checks
+
+Every push and pull request to `main` runs the workflow in `.github/workflows/validate.yml`. It checks the structured configuration files, Hyprland Lua syntax and archived shell helper syntax.
+
+Wait for the workflow to finish before treating a change as validated. These are static checks only; they do not test the desktop on different hardware or display layouts.

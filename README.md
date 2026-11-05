@@ -10,6 +10,7 @@ A personal setup focused on a clean layout, compact tools, subtle animations and
 ![Hyprland](https://img.shields.io/badge/Hyprland-Lua%20config-58E1FF?style=flat-square)
 ![Waybar](https://img.shields.io/badge/Waybar-Custom-222222?style=flat-square)
 ![Setup](https://img.shields.io/badge/Setup-Manual-555555?style=flat-square)
+![Config checks](https://github.com/vampr5861-debug/arch-hyprland-dotfiles/actions/workflows/validate.yml/badge.svg)
 
 [Preview](#preview) · [Features](#features) · [Installation](docs/INSTALLATION.md) · [Keybindings](docs/KEYBINDINGS.md) · [Troubleshooting](docs/TROUBLESHOOTING.md)
 
@@ -89,6 +90,17 @@ Some settings are specific to the original computer:
 | Wallpaper | `~/Pictures/wallhaven-n6y9zl.jpg` | Supply your own image; it is not included |
 
 The Hyprland configuration uses the Lua configuration format. Confirm that your installed Hyprland release supports it before copying the file.
+
+
+## Automated checks
+
+GitHub Actions runs lightweight static checks on pushes and pull requests:
+
+- Waybar JSON, Starship TOML and selected INI files.
+- Hyprland Lua syntax.
+- Shell syntax for the archived helper scripts.
+
+A passing workflow catches syntax errors; it does **not** replace testing the configuration in a real Hyprland session.
 
 ## Documentation
 

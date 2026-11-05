@@ -50,3 +50,8 @@ These changes were made **only in the published copy**, not in the running Arch 
 - Some screenshots visibly show a private LAN address (`192.168.x.x`); this is not an Internet-routable public address, but it may still be worth redacting for privacy.
 
 **Scope:** this is a documentation and file-content audit, not an independent live installation test.
+
+
+## Automated validation
+
+The repository now includes a GitHub Actions workflow that checks Waybar JSON, Starship TOML, selected INI files, Hyprland Lua syntax and archived shell helper syntax. A successful run confirms syntax only; it does not prove runtime compatibility on another machine.
