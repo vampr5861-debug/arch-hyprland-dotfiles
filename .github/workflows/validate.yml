@@ -78,3 +78,41 @@ jobs:
       - name: Check shell script syntax
         run: |
           find extras -type f -name '*.sh' -print0 | xargs -0 -r -n1 bash -n
+
+      - name: Check local Markdown links and images
+        run: |
+          python - <<'PY'
+          import re
+          from pathlib import Path
+          from urllib.parse import unquote, urlsplit
+
+          root = Path.cwd().resolve()
+          markdown = (
+              [root / "README.md", root / "AUDIT.md", root / "PUBLISH.md"]
+              + list((root / "docs").rglob("*.md"))
+              + list((root / "assets").rglob("*.md"))
+              + list((root / "packages").rglob("*.md"))
+              + list((root / "LICENSES").rglob("*.md"))
+              + list((root / "home").rglob("*.md"))
+          )
+          pattern = re.compile(r'!?\[[^\]]*\]\(([^)\n]+)\)|\b(?:href|src)=["\']([^"\']+)["\']')
+          failures = []
+          checked = 0
+
+          for file in sorted(set(markdown)):
+              for match in pattern.finditer(file.read_text(encoding="utf-8")):
+                  raw = (match.group(1) or match.group(2)).strip().strip("<>")
+                  if raw.startswith("#"):
+                      continue
+                  parsed = urlsplit(raw)
+                  if parsed.scheme or parsed.netloc or not parsed.path or raw.startswith("/"):
+                      continue
+                  target = (file.parent / unquote(parsed.path)).resolve()
+                  checked += 1
+                  if not target.is_relative_to(root) or not target.exists():
+                      failures.append(f"{file.relative_to(root)} -> {raw}")
+
+          if failures:
+              raise SystemExit("Broken local references:\n" + "\n".join(failures))
+          print(f"Verified {checked} local Markdown and HTML file references.")
+          PY
