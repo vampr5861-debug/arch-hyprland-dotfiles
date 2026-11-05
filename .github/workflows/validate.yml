@@ -29,16 +29,33 @@ jobs:
           import configparser
           import json
           import tomllib
+          import xml.etree.ElementTree as ET
           from pathlib import Path
 
           json.loads(Path("home/.config/waybar/config.jsonc").read_text())
           tomllib.loads(Path("home/.config/starship.toml").read_text())
+
+          # Wlogout uses consecutive JSON objects rather than a JSON array.
+          remaining = Path("home/.config/wlogout/layout").read_text().lstrip()
+          decoder = json.JSONDecoder()
+          buttons = []
+          while remaining:
+              button, end = decoder.raw_decode(remaining)
+              if not isinstance(button, dict):
+                  raise ValueError("Wlogout layout entries must be JSON objects")
+              buttons.append(button)
+              remaining = remaining[end:].lstrip()
+          if not buttons:
+              raise ValueError("Wlogout layout must contain at least one button")
 
           ini_files = (
               "home/.config/waypaper/config.ini",
               "home/.config/gtk-3.0/settings.ini",
               "home/.config/gtk-4.0/settings.ini",
               "system/usr/share/sddm/themes/where_is_my_sddm_theme/theme.conf",
+              "system/usr/share/sddm/themes/where_is_my_sddm_theme/theme.conf.user",
+              "system/usr/share/sddm/themes/where_is_my_sddm_theme/metadata.desktop",
+              "system/etc/sddm.conf.d/99-where-is-my-sddm.conf",
           )
 
           for name in ini_files:
@@ -46,7 +63,10 @@ jobs:
               with Path(name).open(encoding="utf-8") as stream:
                   parser.read_file(stream)
 
-          print("JSON, TOML and INI files are valid.")
+          for name in ("home/.config/Thunar/uca.xml", "home/.config/waybar/arch-menu.xml"):
+              ET.parse(name)
+
+          print(f"JSON, TOML, INI and XML files are valid; {len(buttons)} Wlogout buttons parsed.")
           PY
 
       - name: Validate Hyprland Lua syntax

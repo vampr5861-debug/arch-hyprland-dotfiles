@@ -14,33 +14,50 @@ cd arch-hyprland-dotfiles
 
 ## 2. Install the components you need
 
+Start from an existing Arch Linux system with working graphics drivers and a usable Wayland session. Keep a TTY recovery path before changing a working desktop.
+
+This snapshot does not record a known-good Hyprland or Waybar version. Check `hyprctl version` and `waybar --version`, then consult the [Hyprland documentation](https://wiki.hypr.land/) and [Waybar documentation](https://github.com/Alexays/Waybar/wiki) for those releases. In particular, this setup needs the Lua `hl.*` API, the `ext/workspaces` module and the Lua expressions passed to `hyprctl dispatch`. Parsing as Lua or JSON does not establish support for these features.
+
 The following is a practical starting set for the desktop configuration. It is not a complete package export and does not include every optional application.
 
 ~~~bash
-sudo pacman -S --needed \
+sudo pacman -Syu --needed \
   hyprland waybar rofi kitty thunar firefox \
   hyprlock hyprpaper hyprsunset hyprpolkitagent hyprshot \
   swaync cliphist wl-clipboard \
-  pipewire pipewire-pulse wireplumber pavucontrol \
+  pipewire pipewire-pulse wireplumber pavucontrol libpulse \
   fish starship playerctl \
   blueman nwg-look papirus-icon-theme materia-gtk-theme \
-  noto-fonts ttf-jetbrains-mono-nerd otf-font-awesome \
+  noto-fonts adwaita-fonts ttf-jetbrains-mono-nerd ttf-iosevka-nerd otf-font-awesome \
   btop cava qt6ct \
-  gvfs tumbler thunar-volman \
+  gvfs tumbler thunar-volman exo \
   xdg-desktop-portal-hyprland xdg-desktop-portal-gtk
 ~~~
+
+`-Syu` performs a full system upgrade as well as installing packages; review the transaction and current Arch upgrade notices. Do not refresh package databases and then perform a partial upgrade.
+
+| Dependency | Used by |
+| :--- | :--- |
+| `libpulse` | `pactl` for Waybar's microphone mute action; `pipewire-pulse` provides the server |
+| `wireplumber`, `playerctl` | `wpctl` audio controls and media-key actions |
+| `exo` | Thunar's `exo-open` custom action; select your preferred terminal in Xfce's preferred applications if needed |
+| `ttf-jetbrains-mono-nerd` | Kitty, Waybar, Hyprlock and the Rofi window switcher |
+| `ttf-iosevka-nerd` | The application launcher's `Iosevka Nerd Font` family |
+| `adwaita-fonts` | The GTK settings' `Adwaita Sans Heavy` font request |
+
+These package names describe the intended Arch dependencies; the exported inventories do not pin their versions. SwayNC is started with its defaults: no custom SwayNC configuration is included. Bluetooth controls also require a functioning Bluetooth service and adapter.
 
 ### Optional packages
 
 | Package | Needed for |
 | :--- | :--- |
-| `waypaper`, `wlogout` | Wallpaper picker and session menu; foreign packages on the original system |
-| `sddm` | Login manager, only if you use SDDM |
+| `waypaper`, `wlogout` | Required for the supplied wallpaper startup / picker and session menu; foreign packages on the original system |
+| `sddm`, `qt6-declarative`, `qt6-5compat` | Optional login manager and the theme's Qt Quick / `Qt5Compat.GraphicalEffects` imports |
 | `nvidia-utils` | Waybar's `nvidia-smi` GPU temperature module |
 | `file-roller`, `thunar-archive-plugin` | Thunar archive integration |
 | `xsettingsd` | Optional XSettings configuration; it is not started by the included Hyprland autostart |
 
-If you already use `yay`, the two foreign packages can be installed with:
+Waypaper and Wlogout are optional only if you omit their integrations. If you already use `yay`, review the package build files and install the two foreign packages with:
 
 ~~~bash
 yay -S --needed waypaper wlogout
@@ -50,19 +67,26 @@ Use a trusted AUR helper or follow the relevant package instructions if you do n
 
 ## 3. Back up your current configuration
 
-From your home directory:
+Before copying, back up each destination you intend to modify. For `~/.config`, run in Bash:
+
+Stop if any backup command fails; do not continue with an incomplete backup. If a symlink manager controls your configuration, use its backup and installation workflow instead: `cp -a` preserves symlinks and does not back up their external targets.
 
 ~~~bash
-cp -a ~/.config "$HOME/.config.backup-$(date +%F-%H%M%S)"
+backup_root=$(mktemp -d "$HOME/momo-backup.XXXXXXXX")
+if [ -e "$HOME/.config" ]; then
+  cp -a "$HOME/.config" "${backup_root:?Backup directory was not created}/config"
+fi
+printf 'Backup directory: %s\n' "$backup_root"
 ~~~
 
-This creates a timestamped copy of your entire current `~/.config` directory. Keep it until you have verified the new setup.
+Record the printed path and keep it until you have verified the new setup. If `~/.config` did not exist, there is no previous configuration to restore. Backups may contain credentials; keep them private and outside this repository. Optional theme and SDDM destinations need their own backups as described below.
 
 ## 4. Copy selected user configurations
 
 Run these commands from the **repository root**. Copy only the components you intend to use.
 
 ~~~bash
+mkdir -p ~/.config
 cp -a home/.config/hypr ~/.config/
 cp -a home/.config/waybar ~/.config/
 cp -a home/.config/rofi ~/.config/
@@ -83,7 +107,13 @@ cp -a home/.config/starship.toml ~/.config/
 
 The GTK settings select `Materia-dark`. The included `Dracula-pink-accent` theme is an additional option; it is not selected automatically by those settings.
 
+Kitty uses your account's login shell. To try the included Fish / Starship configuration, run `fish` in a terminal; copying these files does not change your login shell.
+
 ## 5. Install the included cursor and GTK theme (optional)
+
+Before copying, back up any existing `~/.local/share/icons/Notwaita-Black`, `~/.local/share/icons/default` and `~/.local/share/themes/Dracula-pink-accent` directories to your private backup directory. Copy only the resources you want.
+
+**The optional Dracula theme is incomplete:** some CSS image references have no matching bundled files. See the [audit](../AUDIT.md#repository-review--november-5-2026) for examples. It is not the selected GTK theme; keep Materia for the supplied appearance. Test the optional theme separately before relying on it.
 
 ~~~bash
 mkdir -p ~/.local/share/themes ~/.local/share/icons
@@ -98,15 +128,26 @@ The Notwaita cursor contains internal relative symlinks. Preserve them when copy
 
 Only follow this section if your system already uses SDDM and you intend to use the included theme.
 
-Back up the current SDDM configuration:
+The theme metadata declares **Qt 6** and theme version **1.12.0**. Its QML imports Qt Quick Controls, `SddmComponents` and `Qt5Compat.GraphicalEffects`; ensure the optional packages above are installed. A compatible SDDM / Qt Quick runtime is required; the theme version is not an SDDM version pin. Verify with your installed SDDM release before selecting it.
+
+Back up both the existing SDDM configuration and any theme with the same name. Run in Bash; record the backup path:
 
 ~~~bash
-sudo cp -a /etc/sddm.conf.d "/etc/sddm.conf.d.backup-$(date +%F-%H%M%S)"
+sudo mkdir -p /var/backups
+sddm_backup=$(sudo mktemp -d /var/backups/momo-sddm.XXXXXXXX)
+if [ -d /etc/sddm.conf.d ]; then
+  sudo cp -a /etc/sddm.conf.d "${sddm_backup:?Backup directory was not created}/sddm.conf.d"
+fi
+if [ -d /usr/share/sddm/themes/where_is_my_sddm_theme ]; then
+  sudo cp -a /usr/share/sddm/themes/where_is_my_sddm_theme "${sddm_backup:?Backup directory was not created}/theme"
+fi
+printf 'SDDM backup: %s\n' "$sddm_backup"
 ~~~
 
 Copy the theme and its configuration:
 
 ~~~bash
+sudo mkdir -p /usr/share/sddm/themes /etc/sddm.conf.d
 sudo cp -a system/usr/share/sddm/themes/where_is_my_sddm_theme /usr/share/sddm/themes/
 sudo cp -a system/etc/sddm.conf.d/99-where-is-my-sddm.conf /etc/sddm.conf.d/
 ~~~
@@ -128,6 +169,8 @@ Review these machine-specific settings and change them where necessary:
 
 The wallpaper is deliberately not bundled because its redistribution rights have not been verified.
 
+Waypaper also refers to `~/.config/waypaper/keybindings.ini`, which is not included. Custom Waypaper keybindings cannot be reproduced from this snapshot; check your installed version's defaults or configuration options if it reports a missing file.
+
 ## Verify the setup
 
 After applying the configuration and starting a Hyprland session:
@@ -141,3 +184,23 @@ systemctl --user --failed --no-pager
 If you see configuration errors, do not keep layering changes on top. Restore the affected file from your backup and resolve the reported issue first.
 
 For common adjustments, see [Troubleshooting](TROUBLESHOOTING.md). For the full shortcut list, see [Keybindings](KEYBINDINGS.md).
+
+Cliphist stores copied text and images, which can include sensitive data. The included autostart wipes its history at each Hyprland start, then starts two watchers. There is no active history-picker binding. Check existing user services before starting additional copies of Waybar, SwayNC or clipboard watchers.
+
+## Roll back selected components
+
+If a component fails, use a TTY or another working session. Restore only the affected component from the recorded backup. For example, in Bash, replace the example backup path with your actual one:
+
+~~~bash
+backup_root="$HOME/momo-backup.REPLACE_WITH_YOUR_BACKUP"
+if [ -d "$backup_root/config/hypr" ]; then
+  failed_copy=$(mktemp -d "$HOME/momo-failed.XXXXXXXX")
+  if [ -e "$HOME/.config/hypr" ] || [ -L "$HOME/.config/hypr" ]; then
+    mv "$HOME/.config/hypr" "${failed_copy:?Recovery directory was not created}/hypr"
+  fi && cp -a "$backup_root/config/hypr" "$HOME/.config/hypr"
+fi
+~~~
+
+Moving the failed component aside avoids merging newly introduced files into the restored version. Apply the same approach to other selected components and optional themes. If a component was absent before installation, move the newly added directory aside instead of restoring a nonexistent backup.
+
+For SDDM, use a TTY to restore the previous `99-where-is-my-sddm.conf` from the recorded system backup. If that file did not exist before, move the newly added selector out of `/etc/sddm.conf.d/`. Restore any previous theme directory separately. Avoid restarting SDDM inside a graphical session: it ends that session.

@@ -18,6 +18,8 @@ journalctl --user -b -p warning --no-pager
 
 ## Hyprland does not apply the workspace rules
 
+First check `hyprctl version` against the documentation for your installed release. This snapshot uses Lua's `hl.*` API and does not record a tested Hyprland version. An unsupported configuration format or API must be resolved before hardware-specific rules can be assessed; a successful Lua syntax check alone does not validate it.
+
 The persistent workspace rules in `hyprland.lua` target `DP-1`.
 
 Check your output names:
@@ -60,6 +62,8 @@ rofi -no-config -show drun -theme ~/.config/rofi/launchers/type-4/style-8.rasi
 
 Check that the theme and its `shared/` files were copied together. The theme expects a Nerd Font; install the expected font or adjust the font declarations in the Rofi theme files.
 
+The application launcher requests **Iosevka Nerd Font** (`ttf-iosevka-nerd`); the separate window-switcher configuration requests **JetBrainsMono Nerd Font** (`ttf-jetbrains-mono-nerd`). Installing one family does not supply the other.
+
 ## Wlogout is misplaced on another resolution
 
 The launch command includes fixed margins tuned for a 2560 × 1440 display. It appears in both the Hyprland binding and the Waybar power module.
@@ -74,6 +78,8 @@ Adjust the margins for your display or use a simpler `wlogout` command and tune 
 ## Clipboard history is unavailable
 
 The Hyprland autostart starts `wl-paste` watchers for text and image content and stores entries with Cliphist.
+
+It also runs `cliphist wipe` at each Hyprland start. No history-picker shortcut is configured; scripts under `extras/unreferenced-scripts/` are archived references and are not installed by the guide. See their limitations in [AUDIT.md](../AUDIT.md#repository-review--november-5-2026).
 
 Check that the relevant tools are installed and that the watchers are running:
 
